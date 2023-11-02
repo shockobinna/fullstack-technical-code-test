@@ -19,7 +19,7 @@ class ComissaoBaseadoNoDia(models.Model):
     max_comissao = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):
-        return f"{self.get_dia_da_semana_display()} - {self.produto}"
+        return self.produto
 
 class Produto(models.Model):
     codigo = models.CharField(max_length=100)
