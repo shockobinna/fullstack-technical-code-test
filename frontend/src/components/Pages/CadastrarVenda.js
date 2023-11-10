@@ -129,10 +129,9 @@ function CadastrarVenda() {
 
   // Function to get current date and time as a string
   const getFullDateTime = () => {
-    const brasiliaTimezoneOffset = -3 * 60; // Brasília time is UTC-3
-      const currentDate = new Date(new Date().getTime() + brasiliaTimezoneOffset * 60000);
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      return currentDate.toLocaleDateString('en-US', options);
+    const currentDate = new Date();
+      const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return currentDate.toLocaleDateString('pt-BR', options) + ' - ' + currentDate.toLocaleTimeString('pt-BR', { hour12: false });
   };
   
   // const handleSubmit= (e) =>{
