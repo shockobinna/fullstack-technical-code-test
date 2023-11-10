@@ -3,13 +3,13 @@ from django.db import models
 # Create your models here.
 
 DAY_CHOICES =( 
-    ("Segunda", "Segunda"), 
-    ("Terça", "Terça"), 
-    ("Quarta", "Quarta"), 
-    ("Quinta", "Quinta"),
-    ("Sexta", "Sexta"),
-    ("Sabado", "Sabado"),
-    ("Domingo", "Domingo"),
+    ("Monday", "Segunda"), 
+    ("Tuesday", "Terça"), 
+    ("Wednesday", "Quarta"), 
+    ("Thursday", "Quinta"),
+    ("Friaday", "Sexta"),
+    ("Saturday", "Sabado"),
+    ("Sunday", "Domingo"),
 )
 
 class ComissaoBaseadoNoDia(models.Model):
@@ -74,6 +74,7 @@ class ProdutoVendido(models.Model):
     venda = models.ForeignKey(Venda, on_delete=models.CASCADE)
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
     quantidade = models.IntegerField()
+    comissao_configurado = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     comissao = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
 

@@ -1,5 +1,9 @@
+# import datetime
+# import locale
 from rest_framework import serializers
 from .models import Vendedor, Cliente, Produto, Venda, ComissaoBaseadoNoDia,ProdutoVendido
+
+# locale.setlocale(locale.LC_ALL, 'pt_BR')
 
 class VendedorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,7 +40,7 @@ class ProdutoSerializer(serializers.ModelSerializer):
 class ProdutoVendidoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProdutoVendido
-        fields = ['produto', 'quantidade', 'comissao']
+        fields = ['produto', 'quantidade', 'comissao_configurado','comissao']
 
 class VendaSerializer(serializers.ModelSerializer):
     produtovendido_set = ProdutoVendidoSerializer(many=True)
@@ -52,29 +56,39 @@ class VendaSerializer(serializers.ModelSerializer):
         for produto_vendido_data in produtos_vendidos_data:
             produto = produto_vendido_data.get('produto')
             quantidade = produto_vendido_data.get('quantidade')
-
+            
             comissao_baseado_no_dia = ComissaoBaseadoNoDia.objects.filter(
-                dia_da_semana=venda.datetime.strftime('%A'),
+                dia_da_semana = venda.datetime.strftime('%A'),
                 produto=produto
             ).first()
-            print(comissao_baseado_no_dia)
-
+            
             if comissao_baseado_no_dia:
                 max_comissao = comissao_baseado_no_dia.max_comissao
                 min_comissao = comissao_baseado_no_dia.min_comissao
 
                 percentual_comissao = produto.percentual_comissao
-                if percentual_comissao > max_comissao:
+                if percentual_comissao >= max_comissao:
                     percentual_comissao = max_comissao
+                    
+                    comissao_vendedor = percentual_comissao/100 * produto.valor_unitario * quantidade
+                    produto_vendido_data['comissao_configurado'] = percentual_comissao
+                    produto_vendido_data['comissao'] = comissao_vendedor
+                    
                 else:
                     percentual_comissao = min_comissao
 
-                # comissao = comissao_percentual * quantidade
+                    comissao_vendedor = percentual_comissao/100 * produto.valor_unitario * quantidade
+                    produto_vendido_data['comissao_configurado'] = percentual_comissao
+                    produto_vendido_data['comissao'] = comissao_vendedor
+                    
+
             else:
-                # Use default_comissao on produto is if comissão do dia wasn't configured or found
-                comissao = (produto.percentual_comissao/100) * quantidade
- 
-            produto_vendido_data['comissao'] = comissao
+                # Use default_comissao on produto if comissão do dia wasn't configured or found
+                comissao_vendedor = (produto.valor_unitario * quantidade) * (produto.percentual_comissao / 100)
+
+                produto_vendido_data['comissao_configurado'] = produto.percentual_comissao
+                produto_vendido_data['comissao'] = comissao_vendedor
+
             ProdutoVendido.objects.create(venda=venda, **produto_vendido_data)
 
         return venda

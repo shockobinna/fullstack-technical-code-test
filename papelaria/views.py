@@ -42,25 +42,37 @@ def get_vendas_with_produto_details(request):
     for venda in vendas:
         produtos_vendidos = ProdutoVendido.objects.filter(venda=venda)
         produtos_details = []
+        valor_total = 0
 
         for produto_vendido in produtos_vendidos:
             produto = produto_vendido.produto
+            sub_total = produto.valor_unitario * produto_vendido.quantidade  
+            valor_total += sub_total
+
             produtos_details.append({
+                'id': produto.id,
                 'codigo': produto.codigo,
                 'descricao': produto.descricao,
                 'valor_unitario': produto.valor_unitario,
                 'percentual_comissao': produto.percentual_comissao,
                 'quantidade': produto_vendido.quantidade,
+                'comissao_configurada' : produto_vendido.comissao_configurado,
                 'comissao_a_receber': produto_vendido.comissao 
             })
-
+                
         venda_details.append({
+            'id': venda.id,
             'nota_fiscal': venda.nota_fiscal,
             'datetime': venda.datetime,
             'cliente': venda.cliente.nome,
             'vendedor': venda.vendedor.nome,
-            'produtos': produtos_details
+            'total_compras':valor_total,
+            'produtos': produtos_details,
+            
+            
         })
 
     return Response(venda_details)
+
+
 
