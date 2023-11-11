@@ -1,40 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import '../CadastrarVenda.css'
-import axios from 'axios';
-import Select from 'react-select';
-
+import React, { useEffect, useState } from "react";
+import "../CadastrarVenda.css";
+import axios from "axios";
+import Select from "react-select";
+import * as FaIcons from "react-icons/fa";
 
 function CadastrarVenda() {
-  const [produtos, setProdutos]  = useState([]);
-  const [displayprodutoSelected, setDisplayProdutoSelected] = useState([]);
-  const [produtoSearchList, setProdutoSerachList] = useState([]);
+  const [produtos, setProdutos] = useState([]); // All produtos from the backend
+  const [displayprodutoSelected, setDisplayProdutoSelected] = useState([]); // Display produto in the table
+  const [produtoSearchList, setProdutoSerachList] = useState([]); // produto displayed in the search following figma design
   const [selectedProdutos, setSelectedProdutos] = useState({
-            produto_id : null,
-            quantidade : 0
-
-        });
+    produto_id: '',
+    quantidade: 0,
+  }); // selected produto id for query in the produtos state and also for adicionar button disable logic
   const [clientes, setClientes] = useState([]);
   const [vendedores, setVendedores] = useState([]);
-  const [currentDateTime, setCurrentDateTime] = useState('');
-
+  const [currentDateTime, setCurrentDateTime] = useState("");
+  const [invoiceDetailField, setInvoiceDetailField] = useState({
+    cliente_id: '',
+    vendedor_id: '',
+  }) // Finalizar button disabled and abled logic
+  const [total, setTotal] = useState(0); // Dynamically calculates invoice total
 
   useEffect(() => {
     // Fetch all produtos data when the component mounts
     const fetchProdutos = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/produtos/');
+        const response = await axios.get("http://127.0.0.1:8000/produtos/");
 
-        const formattedOptions = response.data.map(produto => ({
+        const formattedOptions = response.data.map((produto) => ({
           value: produto.id,
           label: `${produto.codigo} - ${produto.descricao}`,
           codigo: produto.codigo, // Add the product code to the option for filtering
         }));
-    
+
         setProdutoSerachList(formattedOptions);
-        setProdutos(response.data)
-        console.log(response.data)
+        setProdutos(response.data);
+        console.log(response.data);
       } catch (error) {
-        console.error('Error fetching data1:', error);
+        console.error("Error fetching data1:", error);
       }
     };
 
@@ -45,35 +48,33 @@ function CadastrarVenda() {
     // Fetch all clientes data when the component mounts
     const fetchClientes = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/clientes/');
+        const response = await axios.get("http://127.0.0.1:8000/clientes/");
         setClientes(response.data);
-        console.log(response.data)
+        console.log(response.data);
       } catch (error) {
-        console.error('Error fetching data1:', error);
+        console.error("Error fetching data1:", error);
       }
     };
 
     fetchClientes();
   }, []); // Empty dependency array to ensure the effect runs only once
 
-
   useEffect(() => {
     // Fetch all clientes data when the component mounts
     const fetchVendedores = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/vendedores/');
+        const response = await axios.get("http://127.0.0.1:8000/vendedores/");
         setVendedores(response.data);
-        console.log(response.data)
+        console.log(response.data);
       } catch (error) {
-        console.error('Error fetching data1:', error);
+        console.error("Error fetching data1:", error);
       }
     };
 
     fetchVendedores();
   }, []); // Empty dependency array to ensure the effect runs only once
 
-
-  useEffect(()=>{
+  useEffect(() => {
     setCurrentDateTime(getFullDateTime());
 
     // Update every second
@@ -83,9 +84,18 @@ function CadastrarVenda() {
 
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
-  })
+  }, []);
 
-    // ***************Functions*******************
+  // Recalculate the invoice total value whenever the total changes
+  useEffect(() => {
+    const newTotal = displayprodutoSelected.reduce(
+      (acc, produto) => acc + produto.total,
+      0
+    );
+    setTotal(newTotal);
+  }, [displayprodutoSelected]);
+
+  // ***************Functions*******************
 
   const filterOptions = ({ label, value, codigo }, inputValue) => {
     const searchValue = inputValue.toLowerCase();
@@ -99,193 +109,267 @@ function CadastrarVenda() {
   };
 
   const handleInputChange = (field, value) => {
-    setSelectedProdutos(prevValues => ({
+    setSelectedProdutos((prevValues) => ({
       ...prevValues,
       [field]: value,
     }));
   };
 
-  const handleAddicionar=() =>{
-    const produto_a_vender = produtos.find(produto => produto.id ===selectedProdutos.produto_id['value'] )
-    console.log(produto_a_vender)
-    if (produto_a_vender){
-      
-      const quant = selectedProdutos.quantidade
-      const preco = produto_a_vender.valor_unitario
-      
+  const handleFinalizeChange = (field, value) => {
+    setInvoiceDetailField((prevValues) => ({
+      ...prevValues,
+      [field]: value,
+    }));
+  };
 
-      const obj = {...produto_a_vender, quantidade: quant, total :(quant * preco) }
+  const handleAddicionar = () => {
+    const produto_a_vender = produtos.find(
+      (produto) => produto.id === selectedProdutos.produto_id["value"]
+    );
+    console.log(produto_a_vender);
+    if (produto_a_vender) {
+      const quant = selectedProdutos.quantidade;
+      const preco = produto_a_vender.valor_unitario;
 
-      setDisplayProdutoSelected(prevData =>[...prevData,obj])
-      
-      
-      
+      const obj = {
+        ...produto_a_vender,
+        quantidade: quant,
+        total: quant * preco,
+      };
+
+      setDisplayProdutoSelected((prevData) => [...prevData, obj]);
+
+      setSelectedProdutos({
+        produto_id: null,
+        quantidade: 0,
+      });
+    } else {
+      console.log("Produto não existe");
     }
-    else{
-      console.log('Produto não existe')
-    }
-
-  }
+  };
 
   // Function to get current date and time as a string
   const getFullDateTime = () => {
     const currentDate = new Date();
-      const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-      return currentDate.toLocaleDateString('pt-BR', options) + ' - ' + currentDate.toLocaleTimeString('pt-BR', { hour12: false });
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return (
+      currentDate.toLocaleDateString("pt-BR", options) +
+      " - " +
+      currentDate.toLocaleTimeString("pt-BR", { hour12: false })
+    );
   };
-  
-  // const handleSubmit= (e) =>{
-  //   e.preventDefault();
-  //     console.log(selectedProdutos.produto_id['value'])
-  //     console.log(selectedProdutos.quantidade)
-  //     console.log("_______________________________________")
-  // }
 
+  // Function to check whether the search field and quantity field are filled before clicking on Adicional
+  const areFieldsFilled = () => {
+    return selectedProdutos.produto_id && selectedProdutos.quantidade;
+  };
+
+  // Function to check whether the all invoice fields are filled before clicking on Finalizar
+  const areInvoiceFieldsFilled = () =>{
+    return displayprodutoSelected.length > 0 && invoiceDetailField.cliente_id && invoiceDetailField.vendedor_id;
+
+  }
+
+  //Deletar venda sendo cadastrada
+  const handleDelete = (produto) =>{
+    const removeItem = displayprodutoSelected.filter((item) => item.id !== produto )
+    setDisplayProdutoSelected(removeItem)
+  }
+  // Finalizar Compras
+  const handleSubmit= (e) =>{
+    e.preventDefault();
+    
+    const invoice = {}
+    invoice.cliente = invoiceDetailField.cliente_id;
+    invoice.vendedor = invoiceDetailField.vendedor_id;
+    invoice.produtovendido_set = displayprodutoSelected.map((item) =>({
+      produto: item.id,
+      quantidade: item.quantidade
+    }))
+
+    axios.post('http://127.0.0.1:8000/vendas/', invoice,{
+      'Content-Type': 'multipart/form-data',
+    })
+    .then(response => {
+      setProdutos(response.data)
+      setDisplayProdutoSelected([])
+      setSelectedProdutos({
+        produto_id: null,
+        quantidade: 0,
+      });
+      setInvoiceDetailField({
+        cliente_id: '',
+        vendedor_id: '',
+      })
+    })
+    .catch(error =>{
+      console.log(error + 'Produto não salvo')
+    })
+    
+  }
 
   return (
-    <div className='container-fluid mt-5'>
-    
-    <div className='row mb-5'>
-      <div className='col-8'>Produtos</div>
-      <div className='col-4'>Dados da Venda</div>
+    <div className="container-fluid mt-5">
+      <div className="row mb-5">
+        <div className="col-8">Produtos</div>
+        <div className="col-4">Dados da Venda</div>
+      </div>
 
-    </div>
-
-    <div className='row'>
-      <div className='col-8'>
-          <div className=''>
-          <form>
+      <div className="row">
+        <div className="col-8">
+          <div className="">
+            <form>
               <div className="row mb-5">
                 <div className="col-6">
-                {/* <label htmlFor="search">Buscar pelo código de barra ou descrição</label>
-                  <input type="text" className="form-control" placeholder="Digite o nome ou o código do produto"/> */}
-                   <label>Digite o nome ou o código do produto</label>
-                    <Select
-                      options={produtoSearchList}
-                      value={selectedProdutos.produto_id}
-                      onChange={value => handleInputChange('produto_id', value)}
-                      filterOption={filterOptions}
-                      isSearchable
-                      placeholder="Digite o código ou o nome do produto"
-                      styles={{
-                        indicatorSeparator: () => ({ display: "none" }),
-                        dropdownIndicator: () => ({ display: "none" }),
-                      }}
-                    />
+                  <label>Buscar pelo código de barra ou descrição</label>
+                  <Select
+                    options={produtoSearchList}
+                    value={selectedProdutos.produto_id}
+                    onChange={(value) => handleInputChange("produto_id", value)}
+                    filterOption={filterOptions}
+                    isSearchable
+                    placeholder="Digite o código ou o nome do produto"
+                    styles={{
+                      indicatorSeparator: () => ({ display: "none" }),
+                      dropdownIndicator: () => ({ display: "none" }),
+                    }}
+                  />
                 </div>
                 <div className="col-2">
-                <label htmlFor="quantidade">Quantidade de Itens</label>
-                  <input type="number" 
-                  className="form-control quant" 
-                  placeholder="0"
-                  onChange={e => handleInputChange('quantidade', e.target.value)}
+                  <label htmlFor="quantidade">Quantidade de Itens</label>
+                  <input
+                    type="number"
+                    className="form-control quant"
+                    value={selectedProdutos.quantidade}
+                    // placeholder="0"
+                    onChange={(e) =>
+                      handleInputChange("quantidade", e.target.value)
+                    }
                   />
                 </div>
                 <div className="col-2 mt-4 text-center">
-                <button 
-                type="button" 
-                className="btn btn-secondary ml-3"
-                onClick={handleAddicionar}
-                >
-                  Adicionar
+                  <button
+                    type="button"
+                    className="btn btn-secondary ml-3"
+                    onClick={handleAddicionar}
+                    disabled={!areFieldsFilled()}
+                  >
+                    Adicionar
                   </button>
                 </div>
               </div>
-          </form>
+            </form>
           </div>
 
-          <div className='row'>
-            <div className='col table-responsive'>
-            <table className="table table-borderless produto_table">
-              <thead>
-                <tr>
-                  <th scope="col">Produtos/Serviços</th>
-                  <th scope="col">Quantidade</th>
-                  <th scope="col">Preço unitário</th>
-                  <th scope="col">Total</th>
-                  <th scope="col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {
-                  displayprodutoSelected.map(item => (
+          <div className="row">
+            <div className="col table-responsive">
+              <table className="table table-borderless produto_table">
+                <thead>
+                  <tr>
+                    <th scope="col">Produtos/Serviços</th>
+                    <th scope="col">Quantidade</th>
+                    <th scope="col">Preço unitário</th>
+                    <th scope="col">Total</th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayprodutoSelected.map((item) => (
                     <React.Fragment key={item.id}>
                       <tr>
-                        <td>{item.codigo}-{item.descricao}</td>
+                        <td>
+                          {item.codigo}-{item.descricao}
+                        </td>
                         <td>{item.quantidade}</td>
                         <td> R${item.valor_unitario}</td>
                         <td> R${item.total}</td>
+                        <td> <i className="action-delete" onClick={ () => handleDelete(item.id)}><FaIcons.FaTrash /> </i> </td>
                       </tr>
                     </React.Fragment>
-                  ))
-                }
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-
-      </div>
-      <div className='col-3 dados'>
-        <div className=''>
-          <form>
-            <div className="form-group mb-4">
-              <label htmlFor="date">Data e Hora da Venda</label>
-              <input type="text" value={currentDateTime} className="form-control" disabled/>
-            </div>
-            <div className="form-group mb-4">
-              <label htmlFor="vendedor">Escolher um vendedor</label>
-              <select className="form-control form-select" id="vendedor">
-                <option selected disabled value="SelecioneNome">Selecione o nome</option>
-                  {
-                    vendedores.map(vendedor =>(
-                      <option key={vendedor.id} value={vendedor.id}>
-                        {vendedor.nome}
-                      </option>
-                    ))
-                  }
-                
-                
-              </select>
-            </div>
-            <div className="form-group mb-5">
-              <label htmlFor="cliente">Escolher um cliente</label>
-              <select className="form-control form-select" id="cliente">
-                <option selected disabled value="SelecioneNome">Selecione o nome</option>
-                {
-                  clientes.map(cliente =>(
+        </div>
+        <div className="col-3 dados">
+          <div className="">
+            <form>
+              <div className="form-group mb-4">
+                <label htmlFor="date">Data e Hora da Venda</label>
+                <input
+                  type="text"
+                  value={currentDateTime}
+                  className="form-control"
+                  disabled
+                />
+              </div>
+              <div className="form-group mb-4">
+                <label htmlFor="vendedor">Escolher um vendedor</label>
+                <select className="form-control form-select" 
+                id="vendedor"
+                value={invoiceDetailField.vendedor_id}
+                onChange={(e) => handleFinalizeChange('vendedor_id', e.target.value)}
+                defaultValue=""
+                >
+                  <option selected disabled value="">
+                    Selecione o nome
+                  </option>
+                  {vendedores.map((vendedor) => (
+                    <option key={vendedor.id} value={vendedor.id}>
+                      {vendedor.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group mb-5">
+                <label htmlFor="cliente">Escolher um cliente</label>
+                <select className="form-control form-select" 
+                id="cliente"
+                value={invoiceDetailField.cliente_id}
+                onChange={(e) => handleFinalizeChange('cliente_id', e.target.value)}
+                defaultValue=""
+                >
+                  <option selected disabled value="">
+                    Selecione o nome
+                  </option>
+                  {clientes.map((cliente) => (
                     <option key={cliente.id} value={cliente.id}>
                       {cliente.nome}
                     </option>
-                  ))
-                }
-              </select>
-            </div>
-
-
-            <div className='row mb-5'>
-              <div className='col'>Valor total da venda:</div>
-              <div className='col text-end'>R$ 7,50</div>
-            </div>
-
-            <div className='row'>
-              <div className='col'>
-                <button className='btn btn-secondary'>Cancelar</button>
+                  ))}
+                </select>
               </div>
-              <div className='col text-end'>
-              <button className='btn btn-secondary'>Finalizar</button>
-              </div>
-            </div>
 
-          </form>
+              <div className="row mb-5">
+                <div className="col">Valor total da venda:</div>
+                <div className="col text-end">R$ {total}</div>
+              </div>
+
+              <div className="row">
+                <div className="col">
+                  <button className="btn btn-secondary">Cancelar</button>
+                </div>
+                <div className="col text-end">
+                  <button className="btn btn-secondary"
+                  onClick={handleSubmit}
+                  disabled={!areInvoiceFieldsFilled()}
+                  >
+                    Finalizar</button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
-      
       </div>
-
     </div>
-    
-    
-    </div>
-  )
+  );
 }
 
-export default CadastrarVenda
+export default CadastrarVenda;

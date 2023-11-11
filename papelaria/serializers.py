@@ -1,5 +1,5 @@
-# import datetime
-# import locale
+from datetime import datetime
+from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from .models import Vendedor, Cliente, Produto, Venda, ComissaoBaseadoNoDia,ProdutoVendido
 
@@ -49,8 +49,20 @@ class VendaSerializer(serializers.ModelSerializer):
         model = Venda
         fields = ['nota_fiscal', 'datetime', 'cliente', 'vendedor', 'produtovendido_set']
 
+        extra_kwargs = {
+            'nota_fiscal': {'required': False},
+            'datetime': {'required': False},
+        }
+
     def create(self, validated_data):
         produtos_vendidos_data = validated_data.pop('produtovendido_set')
+
+        # Generate nota_fiscal here (e.g., using a combination of a prefix and a random string)
+        validated_data['nota_fiscal'] = 'NF' + get_random_string(length=8)
+
+        # Set the datetime field to the current date and time
+        validated_data['datetime'] = datetime.now()
+        
         venda = Venda.objects.create(**validated_data)
 
         for produto_vendido_data in produtos_vendidos_data:
