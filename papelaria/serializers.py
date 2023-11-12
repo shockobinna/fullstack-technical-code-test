@@ -47,9 +47,10 @@ class VendaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Venda
-        fields = ['nota_fiscal', 'datetime', 'cliente', 'vendedor', 'produtovendido_set']
+        fields = ['id','nota_fiscal', 'datetime', 'cliente', 'vendedor', 'produtovendido_set']
 
         extra_kwargs = {
+            'id' : {'required': False},
             'nota_fiscal': {'required': False},
             'datetime': {'required': False},
         }

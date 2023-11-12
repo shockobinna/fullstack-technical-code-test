@@ -3,10 +3,15 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import '../DisplayVendas.css'
 import * as FaIcons from "react-icons/fa";
+import DeleteVendaModal from './DeleteVendaModal';
 
 
 const DisplayVendas = () => {
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [salesData, setSalesData] = useState([]);
+  const [produtoId, setProdutoId] = useState(null)
+  const [produtoDeletado, setProdutoDeletado] = useState(false)
+  const [initialRender, setInitialRender] = useState(true); // logica para a função fetchVendas  funcionar quando o componente é renderizado
   const [totalsForRow, setTotalsForRow] = useState({
     totalQuantidade: 0,
     totalRowProduto: 0,
@@ -14,15 +19,29 @@ const DisplayVendas = () => {
   });
 
   useEffect(() => {
-    // Fetch sales data when the component mounts
-    axios.get('http://127.0.0.1:8000/listallvendas/')
-      .then(response => {
-        setSalesData(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching sales data:', error);
-      });
-  }, []); // Empty dependency array to ensure the effect runs only once
+
+    if(initialRender){
+      fetchVendas(); //buscar todas vendas sempre quando o component é renderizado
+      setInitialRender(false)
+    }
+
+    else if(produtoDeletado){
+      fetchVendas(); // atualizar a list de vendas após deletar alguma venda
+      setProdutoDeletado(false)
+    }
+    
+    
+  }, [produtoDeletado, initialRender]); // dependencias para o fetchVendas fucionar dinamicamente
+
+  const fetchVendas = async () => {
+    await axios.get('http://127.0.0.1:8000/listallvendas/')
+    .then(response => {
+      setSalesData(response.data);
+    })
+    .catch(error => {
+      console.error('Error fetching sales data:', error);
+    });
+  }
 
   const toggleRow = (rowId) => {
     setSalesData(prevData => prevData.map(item => ({
@@ -40,10 +59,6 @@ const DisplayVendas = () => {
     console.log('Update clicked');
   };
 
-  const handleDelete = () => {
-    // Add code to handle "Delete" action here
-    console.log('Delete clicked');
-  };
 
   const calculateTotalsForRow = (rowId) => {
     // Find the object with the matching 'id' in salesData
@@ -71,6 +86,36 @@ const DisplayVendas = () => {
   
     return null; // Return null if no item with matching 'id' is found
   };
+
+  const handleDeleteClick = (id) => {
+    // Open the delete confirmation modal
+    setDeleteModalOpen(true);
+    setProdutoId(id)
+  };
+
+  const handleDeleteConfirm = async() => {
+    try {
+      const response = await axios.delete(`http://127.0.0.1:8000/vendas/${produtoId}`)
+
+      if(response.status === 204){
+        setProdutoDeletado(true)
+      }
+      else{
+        console.log("Falha em deletar o produto")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    finally{
+      setDeleteModalOpen(false)
+    }
+  };
+
+  const handleModalClose = () => {
+    // Close the delete confirmation modal
+    setDeleteModalOpen(false);
+  };
+
   
   
 
@@ -109,11 +154,10 @@ const DisplayVendas = () => {
                   <tr>
                   <td> <i className="action-ver" onClick={() => toggleRow(item.id)}>{item.isExpanded ?'Fechar' : 'Ver Itens'}</i></td>
                   <td> <i className="action-edit" onClick={handleUpdate}><FaIcons.FaEdit /></i> </td>
-                  <td> <i className="action-delete" onClick={handleDelete}><FaIcons.FaTrash /> </i> </td>
+                  <td> <i className="action-delete" onClick={() => handleDeleteClick(item.id)}><FaIcons.FaTrash /> </i> </td>
                   </tr>
 
                 </td>
-                
               </tr>
               {item.isExpanded && (
               <tr className="">
@@ -163,6 +207,12 @@ const DisplayVendas = () => {
           ))}
         </tbody>
       </table>
+
+      <DeleteVendaModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleModalClose}
+        onDelete={handleDeleteConfirm}
+      />
     </div>
   );
 };
