@@ -1,14 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Navbar.css";
 import { Link } from "react-router-dom";
 import * as FaIcons from "react-icons/fa";
 import { SidebarData } from "./SidebarData";
 
+
 function Navbar() {
+  // const [title, setTitle] = useState('')
   const [sidebar, setSidebar] = useState(false);
+
+  // useEffect(() => {
+    
+  //   setTitle(novaVendaTitle);
+  // }, [novaVendaTitle]);
+
+
   const showSidebar = () => {
     setSidebar(!sidebar);
+    
+
   };
+  // const changeNavTitle =(titulo) =>{
+  //   setTitle(titulo)
+  // }
+
+  // console.log("recebi o titulo" +novaVendaTitle)
+
+  
 
   return (
     <>
@@ -34,7 +52,7 @@ function Navbar() {
               <li
                 key={sidebaritem.id}
                 className={sidebaritem.cName}
-                onClick={showSidebar}
+                onClick={showSidebar }
               >
                 <Link to={sidebaritem.path}>
                   {sidebaritem.icon}

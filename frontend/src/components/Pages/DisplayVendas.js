@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../DisplayVendas.css'
 import * as FaIcons from "react-icons/fa";
 import DeleteVendaModal from './DeleteVendaModal';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 const DisplayVendas = () => {
+  const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+  const vendaData = useSelector(state => state.venda);
+  console.log('Current state in the store:', vendaData);
+
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [salesData, setSalesData] = useState([]);
   const [produtoId, setProdutoId] = useState(null)
@@ -25,7 +32,7 @@ const DisplayVendas = () => {
       setInitialRender(false)
     }
 
-    else if(produtoDeletado){
+    if(produtoDeletado){
       fetchVendas(); // atualizar a list de vendas após deletar alguma venda
       setProdutoDeletado(false)
     }
@@ -54,9 +61,12 @@ const DisplayVendas = () => {
     
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = (item) => {
     // Add code to handle "Update" action here
-    console.log('Update clicked');
+    const data = JSON.stringify(item)
+    dispatch({ type: 'UPDATE_VENDA_DATA', payload: data });
+    navigate('/novaVenda', {state:{ editData: data}});
+    console.log('Update clicked :'  + JSON.stringify(item));
   };
 
 
@@ -116,6 +126,13 @@ const DisplayVendas = () => {
     setDeleteModalOpen(false);
   };
 
+  const handleNovaVendaClick = () => {
+    // Call updateTitle with the desired text
+    // updateTitle('Nova Venda');
+  };
+
+  
+
   
   
 
@@ -124,7 +141,7 @@ const DisplayVendas = () => {
       <div className="d-flex justify-content-between">
         <div> <h3>Vendas Realizadas</h3></div>
         <div>
-          <Link to="/novaVenda">
+          <Link to="/novaVenda" onClick={handleNovaVendaClick}>
           <button className='btn btn-secondary'>Inserir Nova Venda</button>
           </Link>
         </div> 
@@ -153,7 +170,10 @@ const DisplayVendas = () => {
 
                   <tr>
                   <td> <i className="action-ver" onClick={() => toggleRow(item.id)}>{item.isExpanded ?'Fechar' : 'Ver Itens'}</i></td>
-                  <td> <i className="action-edit" onClick={handleUpdate}><FaIcons.FaEdit /></i> </td>
+                  <td> <i className="action-edit" onClick={()=> handleUpdate(item)}> 
+                  <FaIcons.FaEdit /> 
+                  </i> 
+                  </td>
                   <td> <i className="action-delete" onClick={() => handleDeleteClick(item.id)}><FaIcons.FaTrash /> </i> </td>
                   </tr>
 
