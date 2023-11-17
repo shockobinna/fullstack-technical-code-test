@@ -4,6 +4,7 @@ import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
 import { useDispatch,useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import EditVendas from "./EditVendas";
 // import { useLocation } from 'react-router-dom';
 
@@ -23,14 +24,23 @@ function CadastrarVenda() {
     vendedor_id: '',
   }) // Finalizar button disabled and abled logic
   const [total, setTotal] = useState(0); // Dynamically calculates invoice total
-  
-  const [editVendas, setEditVendas] = useState(useSelector(state => state.venda || [])); // Use a state to hold the parsed editData
+  const editVendas = useSelector(state => state.venda || []);
+  const navigate = useNavigate()
+  // const [editVendas, setEditVendas] = useState(useSelector(state => state.venda || [])); // Use a state to hold the parsed editData
   const [pessoal, setPessoal] = useState({
+    vendedorId: '',
     nomeVendedor:'',
-    nomeCliente: ''
+    clienteId:'',
+    nomeCliente: '',
+    vendaId:'',
+    notaFiscal:''
   })
 
-  const dispatch = useDispatch();
+  const [paraEditar, setParaEditar] = useState([])
+  
+
+  
+
  
   useEffect(() => {
     // Fetch all produtos data when the component mounts
@@ -55,7 +65,7 @@ function CadastrarVenda() {
     
 
     fetchProdutos();
-  }, []); // Empty dependency array to ensure the effect runs only once
+  }, [editVendas]); // Empty dependency array to ensure the effect runs only once
 
   useEffect(() => {
     // Fetch all clientes data when the component mounts
@@ -70,7 +80,7 @@ function CadastrarVenda() {
     };
 
     fetchClientes();
-  }, []); // Empty dependency array to ensure the effect runs only once
+  }, [editVendas]); // Empty dependency array to ensure the effect runs only once
 
   useEffect(() => {
     // Fetch all clientes data when the component mounts
@@ -85,7 +95,7 @@ function CadastrarVenda() {
     };
 
     fetchVendedores();
-  }, []); // Empty dependency array to ensure the effect runs only once
+  }, [editVendas]); // Empty dependency array to ensure the effect runs only once
   
 
   useEffect(() => {
@@ -101,9 +111,10 @@ function CadastrarVenda() {
   }, [currentDateTime]);
 
   useEffect(() => {
-    console.log(editVendas)
+    console.log(editVendas.vendas.length)
     
-      checkVendasParaEditar();
+        checkVendasParaEditar();
+        
   }, [editVendas]);
 
   // Recalculate the invoice total value whenever the total changes
@@ -115,51 +126,67 @@ function CadastrarVenda() {
     setTotal(newTotal);
   }, [displayprodutoSelected]);
 
+  // Change the URL based on the condition
+  // React.useEffect(() => {
+  //   const newPath = isEditing ? '/editarVenda' : '/novaVenda';
+  //   navigate(newPath);
+  // }, [isEditing, navigate, paraEditar, editVendas]);
   
+
+  
+
+  
+  // ***************Functions*******************
 
   const checkVendasParaEditar = () => {
     
-      const vendaArray = Object.values(editVendas);
-      const updatedSelectedProdutos = [];
-  
-      vendaArray.forEach((venda) => {
-        setPessoal({
-          nomeVendedor:venda.vendedor,
-          nomeCliente: venda.cliente
-        })
-        console.log(venda.produtos);
-        const produtos = venda.produtos;
-  
-        if (produtos && produtos.length > 0) {
-          produtos.forEach((code) => {
-            console.log(code.id);
-            console.log(code.quantidade);
-  
-            // Create a new object for each product
-            const produtoEdit = {
-              id: code.id,
-              codigo: code.codigo,
-              descricao: code.descricao,
-              comissao: code.percentual_comissao,
-              preco: code.valor_unitario,
-              quantidade: code.quantidade,
-              total: code.quantidade * code.valor_unitario,
-            };
-            updatedSelectedProdutos.push(produtoEdit);
-          });
-        }
-      });
-  
-      // Update the displayProdutoSelected state once outside the loops
-      setDisplayProdutoSelected(updatedSelectedProdutos);
-      console.log('Products to edit:', updatedSelectedProdutos);
-      console.log('displayed to edit:', displayprodutoSelected);
-    
-  };
-  
-  
+    const vendaArray = Object.values(editVendas);
+    const updatedSelectedProdutos = [];
 
-  // ***************Functions*******************
+    vendaArray.forEach((venda) => {
+      setPessoal({
+        vendedorId:venda.vendedor_id,
+        nomeVendedor:venda.vendedor,
+        clienteId:venda.cliente_id,
+        nomeCliente: venda.cliente,
+        vendaId: venda.id,
+        notaFiscal : venda.nota_fiscal,
+        datetime :  venda.datetime
+      })
+      console.log(venda.produtos);
+      const produtos = venda.produtos;
+
+      if (produtos && produtos.length > 0) {
+        produtos.forEach((code) => {
+          console.log(code.id);
+          console.log(code.quantidade);
+
+          // Create a new object for each product
+          const produtoEdit = {
+            id: code.id,
+            produto_id: code.produto_id,
+            codigo: code.codigo,
+            descricao: code.descricao,
+            percentual_comissao: code.percentual_comissao,
+            preco: code.valor_unitario,
+            quantidade: code.quantidade,
+            total: code.quantidade * code.valor_unitario,
+            comissao_configurada : code.comissao_configurada,
+            comissao_a_receber : code.comissao_a_receber
+          };
+          updatedSelectedProdutos.push(produtoEdit);
+        });
+      }
+    });
+
+    // Update the displayProdutoSelected state once outside the loops
+    // setDisplayProdutoSelected(updatedSelectedProdutos);
+    setParaEditar(updatedSelectedProdutos);
+    console.log('Products to edit:', updatedSelectedProdutos);
+    console.log('displayed to edit:', paraEditar);
+    
+  
+};
 
   const filterOptions = ({ label, value, codigo }, inputValue) => {
     const searchValue = inputValue.toLowerCase();
@@ -283,9 +310,10 @@ function CadastrarVenda() {
 
   return (
     <div>{
-      displayprodutoSelected.length > 0 ?(
+      paraEditar.length > 0  ?(
         <EditVendas
-        displayprodutoSelected={displayprodutoSelected}
+        produtos = {produtos}
+        displayprodutoSelected={paraEditar}
         clientes = {clientes}
         vendedores = {vendedores}
         vendedorCliente = {pessoal}

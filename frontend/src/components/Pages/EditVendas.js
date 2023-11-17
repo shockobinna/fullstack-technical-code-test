@@ -1,181 +1,166 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState} from "react";
+import { useNavigate } from 'react-router-dom';
 import "../CadastrarVenda.css";
 import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
 
 
-function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorCliente, produtoSearchList}) {
+function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorCliente, produtoSearchList, produtos}) {
 
-
-    // return(
-    //     <div>Hey!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!</div>
-    // )
+  const navigate = useNavigate();
+  const [editProduto, setEditProduto] = useState([])
+  const [editPessoa, setEditPessoa] = useState({})
+  const [addProduto, setAddproduto] = useState({
+    produto_id: null,
+    quantidade: 0,
+  })
+  const [total, setTotal] = useState(0); // Dynamically calculates invoice total
+  const [timeNow, setTimeNow] = useState("")
   
-//   const checkVendasParaEditar = () => {
+
+  useEffect(() => {
+    setEditProduto([...displayprodutoSelected])
+    setEditPessoa({...vendedorCliente})
     
-//       const vendaArray = Object.values(editVendas);
-//       const updatedSelectedProdutos = [];
-//       const vendedorClientDetail = {}
-  
-//       vendaArray.forEach((venda) => {
-//         console.log(venda.produtos);
-//         const produtos = venda.produtos;
-//         setInvoiceDetailField({
-//           vendedor_id:venda
-//         })
-//         vendedorClientDetail={
+  }, [displayprodutoSelected,vendedores,clientes])
 
-//         }
-  
-//         if (produtos && produtos.length > 0) {
-//           produtos.forEach((code) => {
-//             console.log(code.id);
-//             console.log(code.quantidade);
-  
-//             // Create a new object for each product
-//             const produtoEdit = {
-//               id: code.id,
-//               codigo: code.codigo,
-//               descricao: code.descricao,
-//               comissao: code.percentual_comissao,
-//               preco: code.valor_unitario,
-//               quantidade: code.quantidade,
-//               total: code.quantidade * code.valor_unitario,
-//             };
-//             updatedSelectedProdutos.push(produtoEdit);
-//           });
-//         }
-//       });
-  
-//       // Update the displayProdutoSelected state once outside the loops
-//       setDisplayProdutoSelected(updatedSelectedProdutos);
-//       console.log('Products to edit:', updatedSelectedProdutos);
-    
-//   };
-  
-  
+  useEffect(() => {
+    setTimeNow(getFullDateTime());
+
+    // Update every second
+    const intervalId = setInterval(() => {
+      setTimeNow(getFullDateTime());
+    }, 1000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [timeNow]);
+
+  useEffect(() => {
+    const newTotal = editProduto.reduce(
+      (acc, produto) => acc + produto.total,
+      0
+    );
+    setTotal(newTotal);
+  }, [editProduto]);
+
+ 
 
 //   // ***************Functions*******************
 
-//   const filterOptions = ({ label, value, codigo }, inputValue) => {
-//     const searchValue = inputValue.toLowerCase();
+  const handleInputChange = (field, value) => {
+    setAddproduto((prevValues) => ({
+      ...prevValues,
+      [field]: value,
+    }));
+  };
 
-//     // Check if the label, value, or code includes the search value
-//     return (
-//       label.toLowerCase().includes(searchValue) ||
-//       (value && value.toString().includes(searchValue)) ||
-//       (codigo && codigo.toString().includes(searchValue))
-//     );
-//   };
+  const handlePessoa = (field, value) => {
+    setEditPessoa((prevValues) => ({
+      ...prevValues,
+      [field]: value,
+    }));
+  };
 
-//   const handleInputChange = (field, value) => {
-//     setSelectedProdutos((prevValues) => ({
-//       ...prevValues,
-//       [field]: value,
-//     }));
-//   };
+  const handleEditAddicionar = () => {
+    // if(produtos){
+      console.log(produtoSearchList)
+      console.log(addProduto)
+      console.log(editProduto)
+    const produto_a_editar = produtos.find(
+      (produto) => produto.id === addProduto.produto_id['value']
+    );
+    console.log(produto_a_editar);
+    if (produto_a_editar) {
 
-//   const handleFinalizeChange = (field, value) => {
-//     setInvoiceDetailField((prevValues) => ({
-//       ...prevValues,
-//       [field]: value,
-//     }));
-//   };
+      const obj = {
+              id: produto_a_editar.id,
+              codigo: produto_a_editar.codigo,
+              descricao: produto_a_editar.descricao,
+              percentual_comissao: produto_a_editar.percentual_comissao,
+              preco: produto_a_editar.valor_unitario,
+              quantidade: addProduto.quantidade,
+              total: addProduto.quantidade * produto_a_editar.valor_unitario,
+      };
 
-//   const handleAddicionar = () => {
-//     if(produtos){
-//     const produto_a_vender = produtos.find(
-//       (produto) => produto.id === selectedProdutos.produto_id["value"]
-//     );
-//     console.log(produto_a_vender);
-//     if (produto_a_vender) {
-//       const quant = selectedProdutos.quantidade;
-//       const preco = produto_a_vender.valor_unitario;
+      setEditProduto((prevData) => [...prevData, obj]);
 
-//       const obj = {
-//         ...produto_a_vender,
-//         quantidade: quant,
-//         total: quant * preco,
-//       };
+      setAddproduto({
+        produto_id: null,
+        quantidade: 0,
+      });
+    } else {
+      console.log("Produto não existe");
+    }
+  // }
+  };
 
-//       setDisplayProdutoSelected((prevData) => [...prevData, obj]);
+  // Function to get current date and time as a string
+  const getFullDateTime = () => {
+    const currentDate = new Date();
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return (
+      currentDate.toLocaleDateString("pt-BR", options) +
+      " - " +
+      currentDate.toLocaleTimeString("pt-BR", { hour12: false })
+    );
+  };
 
-//       setSelectedProdutos({
-//         produto_id: null,
-//         quantidade: 0,
-//       });
-//     } else {
-//       console.log("Produto não existe");
-//     }
-//   }
-//   };
+  // Function to check whether the search field and quantity field are filled before clicking on Adicional
+  const areFieldsFilled = () => {
+    return addProduto.produto_id && addProduto.quantidade;
+  };
 
-//   // Function to get current date and time as a string
-//   const getFullDateTime = () => {
-//     const currentDate = new Date();
-//     const options = {
-//       day: "2-digit",
-//       month: "2-digit",
-//       year: "numeric",
-//       hour: "2-digit",
-//       minute: "2-digit",
-//     };
-//     return (
-//       currentDate.toLocaleDateString("pt-BR", options) +
-//       " - " +
-//       currentDate.toLocaleTimeString("pt-BR", { hour12: false })
-//     );
-//   };
+  // Function to check whether the all invoice fields are filled before clicking on Finalizar
+  const areInvoiceFieldsFilled = () =>{
+    return editProduto.length > 0 && editPessoa.clienteId && editPessoa.vendedorId;
 
-//   // Function to check whether the search field and quantity field are filled before clicking on Adicional
-//   const areFieldsFilled = () => {
-//     return selectedProdutos.produto_id && selectedProdutos.quantidade;
-//   };
+  }
 
-//   // Function to check whether the all invoice fields are filled before clicking on Finalizar
-//   const areInvoiceFieldsFilled = () =>{
-//     return displayprodutoSelected.length > 0 && invoiceDetailField.cliente_id && invoiceDetailField.vendedor_id;
-
-//   }
-
-//   //Deletar venda sendo cadastrada
-//   const handleDelete = (produto) =>{
-//     const removeItem = displayprodutoSelected.filter((item) => item.id !== produto )
-//     setDisplayProdutoSelected(removeItem)
-//   }
-//   // Finalizar Compras
-//   const handleSubmit= (e) =>{
-//     e.preventDefault();
+  //Deletar venda sendo cadastrada
+  const handleEditDelete = (id) =>{
+    const removedItem = editProduto.filter((item) => item.id !== id )
+    console.log(id)
+    setEditProduto(removedItem)
+    axios.delete(`http://127.0.0.1:8000/produtosvendidos/${id}/`).
+    then(response => console.log(response)).
+    catch(error => console.log(error))
     
-//     const invoice = {}
-//     invoice.cliente = invoiceDetailField.cliente_id;
-//     invoice.vendedor = invoiceDetailField.vendedor_id;
-//     invoice.produtovendido_set = displayprodutoSelected.map((item) =>({
-//       produto: item.id,
-//       quantidade: item.quantidade
-//     }))
-
-//     axios.post('http://127.0.0.1:8000/vendas/', invoice,{
-//       'Content-Type': 'multipart/form-data',
-//     })
-//     .then(response => {
-//       setProdutos(response.data)
-//       setDisplayProdutoSelected([])
-//       setSelectedProdutos({
-//         produto_id: null,
-//         quantidade: 0,
-//       });
-//       setInvoiceDetailField({
-//         cliente_id: '',
-//         vendedor_id: '',
-//       })
-//     })
-//     .catch(error =>{
-//       console.log(error + 'Produto não salvo')
-//     })
+  }
+  // Finalizar Compras
+  const handleSubmit= (e) =>{
+    e.preventDefault();
     
-//   }
+    const invoice = {}
+    invoice.id = editPessoa.vendaId;
+    invoice.nota_fiscal = editPessoa.notaFiscal
+    invoice.cliente = editPessoa.clienteId;
+    invoice.vendedor = editPessoa.vendedorId;
+    invoice.datetime = editPessoa.datetime
+
+
+    axios.patch(`http://127.0.0.1:8000/vendas/${invoice.id}/`, invoice,{
+      headers: {
+        'Content-Type': 'application/json',
+    }
+    })
+    .then(response => {
+      console.log(response)
+      navigate('/')
+      
+    })
+    .catch(error =>{
+      console.log(error + 'Produto não salvo')
+    })
+    
+  }
 
 
   return (
@@ -194,8 +179,8 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                   <label>Buscar pelo código de barra ou descrição</label>
                   <Select
                     options={produtoSearchList}
-                    // value={selectedProdutos.produto_id}
-                    // onChange={(value) => handleInputChange("produto_id", value)}
+                    value={addProduto.produto_id}
+                    onChange={(value) => handleInputChange("produto_id", value)}
                     // filterOption={filterOptions}
                     isSearchable
                     placeholder="Digite o código ou o nome do produto"
@@ -210,19 +195,19 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                   <input
                     type="number"
                     className="form-control quant"
-                    // value={selectedProdutos.quantidade}
+                    value={addProduto.quantidade}
                     // // placeholder="0"
-                    // onChange={(e) =>
-                    //   handleInputChange("quantidade", e.target.value)
-                    // }
+                    onChange={(e) =>
+                      handleInputChange("quantidade", e.target.value)
+                    }
                   />
                 </div>
                 <div className="col-2 mt-4 text-center">
                   <button
                     type="button"
                     className="btn btn-secondary ml-3"
-                    // onClick={handleAddicionar}
-                    // disabled={!areFieldsFilled()}
+                    onClick={handleEditAddicionar}
+                    disabled={!areFieldsFilled()}
                   >
                     Adicionar
                   </button>
@@ -244,16 +229,16 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                   </tr>
                 </thead>
                 <tbody>
-                  {displayprodutoSelected.map((item) => (
+                  {editProduto.map((item) => (
                     <React.Fragment key={item.id}>
                       <tr>
                         <td>
                           {item.codigo}-{item.descricao}
                         </td>
                         <td>{item.quantidade}</td>
-                        <td> R${item.valor_unitario}</td>
+                        <td> R${item.preco}</td>
                         <td> R${item.total}</td>
-                        <td> <i className="action-delete"><FaIcons.FaTrash /> </i> </td>
+                        <td> <i className="action-delete" onClick={ () => handleEditDelete(item.id)}><FaIcons.FaTrash /> </i> </td>
                       </tr>
                     </React.Fragment>
                   ))}
@@ -269,7 +254,7 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                 <label htmlFor="date">Data e Hora da Venda</label>
                 <input
                   type="text"
-                //   value={currentDateTime}
+                  value={timeNow}
                   className="form-control"
                   disabled
                 />
@@ -278,12 +263,12 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                 <label htmlFor="vendedor">Escolher um vendedor</label>
                 <select className="form-control form-select" 
                 id="vendedor"
-                // value={invoiceDetailField.vendedor_id}
-                // onChange={(e) => handleFinalizeChange('vendedor_id', e.target.value)}
+                value={editPessoa.vendedorId}
+                onChange={(e) => handlePessoa('vendedorId', e.target.value)}
                 defaultValue=""
                 >
                   <option selected disabled value="">
-                    Selecione o nome
+                    {editPessoa.nomeVendedor}
                   </option>
                   {vendedores.map((vendedor) => (
                     <option key={vendedor.id} value={vendedor.id}>
@@ -296,12 +281,12 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                 <label htmlFor="cliente">Escolher um cliente</label>
                 <select className="form-control form-select" 
                 id="cliente"
-                // value={invoiceDetailField.cliente_id}
-                // onChange={(e) => handleFinalizeChange('cliente_id', e.target.value)}
+                value={editPessoa.clienteId}
+                onChange={(e) => handlePessoa('clienteId', e.target.value)}
                 defaultValue=""
                 >
                   <option selected disabled value="">
-                    Selecione o nome
+                    {editPessoa.nomeCliente}
                   </option>
                   {clientes.map((cliente) => (
                     <option key={cliente.id} value={cliente.id}>
@@ -313,7 +298,7 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
 
               <div className="row mb-5">
                 <div className="col">Valor total da venda:</div>
-                <div className="col text-end">R$ 7.50</div>
+                <div className="col text-end">R$ {total}</div>
               </div>
 
               <div className="row">
@@ -322,8 +307,8 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                 </div>
                 <div className="col text-end">
                   <button className="btn btn-secondary"
-                //   onClick={handleSubmit}
-                //   disabled={!areInvoiceFieldsFilled()}
+                  onClick={handleSubmit}
+                  disabled={!areInvoiceFieldsFilled()}
                   >
                     Finalizar</button>
                 </div>

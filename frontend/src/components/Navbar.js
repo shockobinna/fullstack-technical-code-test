@@ -1,40 +1,47 @@
 import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./Navbar.css";
-import { Link } from "react-router-dom";
 import * as FaIcons from "react-icons/fa";
 import { SidebarData } from "./SidebarData";
 
 
 function Navbar() {
-  // const [title, setTitle] = useState('')
   const [sidebar, setSidebar] = useState(false);
-
-  // useEffect(() => {
-    
-  //   setTitle(novaVendaTitle);
-  // }, [novaVendaTitle]);
-
+  const location = useLocation();
 
   const showSidebar = () => {
     setSidebar(!sidebar);
     
-
   };
-  // const changeNavTitle =(titulo) =>{
-  //   setTitle(titulo)
-  // }
 
-  // console.log("recebi o titulo" +novaVendaTitle)
+  // Function to get the title based on the current route
+  const getTitle = () => {
+    switch (location.pathname) {
+      case "/":
+        return "Vendas";
+      case "/comissao":
+        return "Comissão";
+      case "/editarVenda":
+        return "Alterar Venda";
+      case "/novaVenda":
+        return "Nova";
+      
+      default:
+        return "Vendas";
+    }
+  };
 
+  useEffect(() => {
+    document.title = getTitle();
+  }, [location]);
   
-
   return (
     <>
       <div className="navbar">
         <Link to="#" className="nav-menu-icon" onClick={showSidebar}>
           <FaIcons.FaBars />
         </Link>
-        <h3 className="titulo">Vendas</h3>
+        <h3 className="titulo">{getTitle()}</h3>
         <h3 className=""></h3>
       </div>
       <div

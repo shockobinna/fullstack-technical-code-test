@@ -5,6 +5,7 @@ import '../DisplayVendas.css'
 import * as FaIcons from "react-icons/fa";
 import DeleteVendaModal from './DeleteVendaModal';
 import { useDispatch, useSelector } from 'react-redux';
+import { updateVendaData } from '../../redux/actions';
 
 
 const DisplayVendas = () => {
@@ -12,23 +13,42 @@ const DisplayVendas = () => {
 
   const dispatch = useDispatch();
   const vendaData = useSelector(state => state.venda);
-  console.log('Current state in the store:', vendaData);
+  const produtosData = useSelector(state => state.produtos);
+  const clientesData = useSelector(state => state.clientes);
+  const vendedoresData = useSelector(state => state.vendedores);
+  console.log('Current state in the store:', vendaData, vendaData.vendas.length);
+  console.log('Current produtos in the store:', produtosData, produtosData.produtos.length);
+  console.log('Current state in the store:', clientesData, clientesData.clientes.length);
+  console.log('Current state in the store:', vendedoresData, vendedoresData.vendedores.length);
 
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [salesData, setSalesData] = useState([]);
   const [produtoId, setProdutoId] = useState(null)
   const [produtoDeletado, setProdutoDeletado] = useState(false)
+  const [produtos, setProdutos] = useState([])
+  const [clientes, setClientes] = useState([])
+  const [vendedores, setVendedores] = useState([])
   const [initialRender, setInitialRender] = useState(true); // logica para a função fetchVendas  funcionar quando o componente é renderizado
   const [totalsForRow, setTotalsForRow] = useState({
     totalQuantidade: 0,
     totalRowProduto: 0,
     totalComissao: 0
   });
+  useEffect(() => {
+
+    dispatch(updateVendaData([]))
+  
+    
+  }, [dispatch])
+  
 
   useEffect(() => {
 
     if(initialRender){
       fetchVendas(); //buscar todas vendas sempre quando o component é renderizado
+      fetchProdutos();
+      fetchClientes();
+      fetchVendedores();
       setInitialRender(false)
     }
 
@@ -49,6 +69,47 @@ const DisplayVendas = () => {
       console.error('Error fetching sales data:', error);
     });
   }
+
+  const fetchProdutos = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/produtos/");
+
+      const formattedOptions = response.data.map((produto) => ({
+        value: produto.id,
+        label: `${produto.codigo} - ${produto.descricao}`,
+        codigo: produto.codigo, // Add the product code to the option for filtering
+      }));
+      dispatch({ type: 'ADD_PRODUTOS', payload: response.data });
+      // setProdutoSerachList(formattedOptions);
+      setProdutos(response.data);
+      console.log(response.data);
+      
+    } catch (error) {
+      console.error("Error fetching data1:", error);
+    }
+  };
+
+  const fetchClientes = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/clientes/");
+      dispatch({ type: 'ADD_CLIENTES', payload: response.data });
+      setClientes(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching data1:", error);
+    }
+  };
+
+  const fetchVendedores = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/vendedores/");
+      dispatch({ type: 'ADD_VENDEDORES', payload: response.data });
+      setVendedores(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching data1:", error);
+    }
+  };
 
   const toggleRow = (rowId) => {
     setSalesData(prevData => prevData.map(item => ({
@@ -131,6 +192,19 @@ const DisplayVendas = () => {
     // updateTitle('Nova Venda');
   };
 
+  const formatarData =(data)=>{
+   const formatada = new Date(data).toLocaleString('pt-BR', {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+      timeZone: 'UTC',
+    }).replace(/,/g, ' -');;
+    return formatada 
+  }
+
   
 
   
@@ -154,7 +228,7 @@ const DisplayVendas = () => {
             <th>Vendedor</th>
             <th>Data da Venda</th>
             <th>Valor Total</th>
-            <th>Opcões</th>
+            <th style={{paddingLeft:'40px'}}>Opcões</th>
           </tr>
         </thead>
         <tbody>
@@ -164,8 +238,8 @@ const DisplayVendas = () => {
                 <td>{item.nota_fiscal}</td>
                 <td>{item.cliente}</td>
                 <td>{item.vendedor}</td>
-                <td>{item.datetime}</td>
-                <td>{item.total_compras}</td>
+                <td>{formatarData(item.datetime)}</td>
+                <td style={{paddingLeft:'50px'}}>{item.total_compras}</td>
                 <td>
 
                   <tr>
@@ -180,7 +254,7 @@ const DisplayVendas = () => {
                 </td>
               </tr>
               {item.isExpanded && (
-              <tr className="">
+              // <tr className="">
                 <td colspan="6">
                   <table className="table table-borderless">
                     <thead>
@@ -197,11 +271,11 @@ const DisplayVendas = () => {
                       {item.produtos.map(produto => (
                         <tr key={produto.id}>
                           <td>{produto.descricao}</td>
-                          <td>{produto.quantidade}</td>
-                          <td>R${produto.valor_unitario}</td>
-                          <td>R${produto.valor_unitario * produto.quantidade}</td>
-                          <td>{produto.comissao_configurada}%</td>
-                          <td>R${produto.comissao_a_receber}</td>
+                          <td style={{paddingLeft:'50px'}}>{produto.quantidade}</td>
+                          <td style={{paddingLeft:'50px'}}>R${produto.valor_unitario}</td>
+                          <td style={{paddingLeft:'50px'}}>R${produto.valor_unitario * produto.quantidade}</td>
+                          <td style={{paddingLeft:'50px'}}>{produto.comissao_configurada}%</td>
+                          <td style={{paddingLeft:'30px'}}>R${produto.comissao_a_receber}</td>
                         </tr>
                         
                       ))
@@ -212,16 +286,17 @@ const DisplayVendas = () => {
                           <thead>
                             <tr>
                               <th className='produto_servico'>Total de Venda</th>
-                              <th>{totalsForRow.totalQuantidade}</th>
+                              <th style={{paddingLeft:'50px'}}>{totalsForRow.totalQuantidade}</th>
                               <th>&nbsp;</th>
-                              <th className='produto_total'>R$ {totalsForRow.totalRowProduto}</th>
+                              <th style={{paddingRight:'23px'}}>R$ {totalsForRow.totalRowProduto}</th>
                               <th></th>
-                              <th className='produto_comissao'>R$ {totalsForRow.totalComissao}</th>
+                              <th style={{paddingLeft:'30px'}} className='produto_comissao'>R$ {totalsForRow.totalComissao}</th>
                             </tr>
                           </thead>
+                          <tbody></tbody>
                         </table>  
                 </td>
-               </tr>
+              //  </tr>
             )}
             </React.Fragment>
           ))}

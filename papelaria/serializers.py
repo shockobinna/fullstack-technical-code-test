@@ -40,7 +40,10 @@ class ProdutoSerializer(serializers.ModelSerializer):
 class ProdutoVendidoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProdutoVendido
-        fields = ['produto', 'quantidade', 'comissao_configurado','comissao']
+        fields = ['id', 'produto', 'quantidade', 'comissao_configurado','comissao']
+        # extra_kwargs = {
+        #     'id' : {'required': False},
+        # }
 
 class VendaSerializer(serializers.ModelSerializer):
     produtovendido_set = ProdutoVendidoSerializer(many=True)
@@ -105,5 +108,3 @@ class VendaSerializer(serializers.ModelSerializer):
             ProdutoVendido.objects.create(venda=venda, **produto_vendido_data)
 
         return venda
-
-
