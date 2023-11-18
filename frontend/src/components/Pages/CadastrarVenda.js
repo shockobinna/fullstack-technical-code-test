@@ -3,10 +3,13 @@ import "../CadastrarVenda.css";
 import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
 import { useDispatch,useSelector } from 'react-redux';
 
 
 function CadastrarVenda() {
+
+  const navigate = useNavigate();
 
     // from redux store [produtos, clientes,vendedores, produtoSearchList]
   const produtos = useSelector(state => state.produtos['produtos'][0] || []);
@@ -84,7 +87,6 @@ function CadastrarVenda() {
     const produto_a_vender = produtos.find(
       (produto) => produto.id === selectedProdutos.produto_id["value"]
     );
-    console.log(produto_a_vender);
     if (produto_a_vender) {
       const quant = selectedProdutos.quantidade;
       const preco = produto_a_vender.valor_unitario;
@@ -98,8 +100,8 @@ function CadastrarVenda() {
       setDisplayProdutoSelected((prevData) => [...prevData, obj]);
 
       setSelectedProdutos({
-        produto_id: null,
-        quantidade: 0,
+        produto_id: '',
+        quantidade: '',
       });
     } else {
       console.log("Produto não existe");
@@ -156,16 +158,17 @@ function CadastrarVenda() {
       'Content-Type': 'multipart/form-data',
     })
     .then(response => {
-      // setProdutos(response.data)
       setDisplayProdutoSelected([])
       setSelectedProdutos({
-        produto_id: null,
-        quantidade: 0,
+        produto_id: '',
+        quantidade: '',
       });
       setInvoiceDetailField({
         cliente_id: '',
         vendedor_id: '',
       })
+      navigate('/', { state: { actionResult: { success: true } } });
+
     })
     .catch(error =>{
       console.log(error + 'Produto não salvo')
@@ -178,8 +181,8 @@ function CadastrarVenda() {
     <div>{  
       <div className="container-fluid mt-5 min-vh-100">
         <div className="row mb-5">
-          <div className="col-8">Produtos</div>
-          <div className="col-4">Dados da Venda</div>
+          <div className="col-8"><h3>Produtos</h3> </div>
+          <div className="col-4"><h3>Dados da Venda</h3></div>
         </div>
 
         <div className="row">
@@ -208,9 +211,8 @@ function CadastrarVenda() {
                       type="number"
                       className="form-control quant"
                       value={selectedProdutos.quantidade}
-                      // placeholder="0"
                       onChange={(e) =>
-                        handleInputChange("quantidade", e.target.value)
+                        handleInputChange("quantidade", Number(e.target.value))
                       }
                     />
                   </div>
@@ -230,7 +232,7 @@ function CadastrarVenda() {
 
             <div className="row">
               <div className="col table-responsive">
-                <table className="table table-borderless produto_table">
+                <table className="table table-borderless produto_table table-light">
                   <thead>
                     <tr>
                       <th scope="col">Produtos/Serviços</th>
@@ -272,12 +274,12 @@ function CadastrarVenda() {
                   />
                 </div>
                 <div className="form-group mb-4">
-                  <label htmlFor="vendedor">Escolher um vendedor</label>
+                  <label htmlFor="vendedor">Escolha um vendedor</label>
                   <select className="form-control form-select" 
                   id="vendedor"
                   value={invoiceDetailField.vendedor_id}
                   onChange={(e) => handleFinalizeChange('vendedor_id', e.target.value)}
-                  defaultValue=""
+                  // defaultValue=""
                   >
                     <option selected disabled value="">
                       Selecione o nome
@@ -290,12 +292,12 @@ function CadastrarVenda() {
                   </select>
                 </div>
                 <div className="form-group mb-5">
-                  <label htmlFor="cliente">Escolher um cliente</label>
+                  <label htmlFor="cliente">Escolha um cliente</label>
                   <select className="form-control form-select" 
                   id="cliente"
                   value={invoiceDetailField.cliente_id}
                   onChange={(e) => handleFinalizeChange('cliente_id', e.target.value)}
-                  defaultValue=""
+                  // defaultValue=""
                   >
                     <option selected disabled value="">
                       Selecione o nome

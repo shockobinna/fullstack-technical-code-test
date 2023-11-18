@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import '../DisplayVendas.css'
 import * as FaIcons from "react-icons/fa";
 import DeleteVendaModal from './DeleteVendaModal';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateVendaData } from '../../redux/actions';
 
 
 const DisplayVendas = () => {
@@ -14,6 +16,7 @@ const DisplayVendas = () => {
   const dispatch = useDispatch();
 
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [toastDisplayed, setToastDisplayed] = useState(false);
   const [salesData, setSalesData] = useState([]);
   const [produtoId, setProdutoId] = useState(null)
   const [produtoDeletado, setProdutoDeletado] = useState(false)
@@ -39,14 +42,73 @@ const DisplayVendas = () => {
       setProdutoDeletado(false)
     }
     
-    
   }, [produtoDeletado, initialRender]); // dependencias para o fetchVendas fucionar dinamicamente
+
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check the nested state property
+    const actionResult = location.state?.actionResult;
+    const isSuccess = actionResult?.success;
+    const editResult = location.state?.editResult;
+    const isEditSuccess = editResult?.success
+    
+    
+    if (!initialRender && isSuccess && !toastDisplayed) {
+      // Show success toast with a delay
+       const toastId = setTimeout(()=>{toast.success('VENDA REALIZADA COM SUCESSO!', {
+          position: 'top-right',
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          style: {
+            backgroundColor: '#78D6C6', 
+            width: '575px', 
+            color: 'white'
+          },
+        })},500
+        );
+        setToastDisplayed(true)
+        return () => {
+          // Cleanup function to clear the toast when the component unmounts
+          clearTimeout(toastId);
+        };
+      } else if(!initialRender && isEditSuccess && !toastDisplayed){
+
+        const toastId = setTimeout(()=>{toast.success('VENDA ALTERADA COM SUCESSO!', {
+          position: 'top-right',
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          style: {
+            backgroundColor: '#78D6C6', 
+            width: '575px', 
+            color: 'white'
+          },
+        })},500
+        );
+
+        setToastDisplayed(true)
+        return () => {
+          // Cleanup function to clear the toast when the component unmounts
+          clearTimeout(toastId);
+        };
+
+      }
+        
+      
+    
+  }, [location.state, toastDisplayed, initialRender]);
+
 
   const fetchVendas = async () => {
     await axios.get('http://127.0.0.1:8000/listallvendas/')
     .then(response => {
       setSalesData(response.data);
-      console.log(response.data.length)
     })
     .catch(error => {
       console.error('Error fetching sales data:', error);
@@ -105,8 +167,7 @@ const DisplayVendas = () => {
     // Add code to handle "Update" action here
     const data = JSON.stringify(item)
     dispatch({ type: 'UPDATE_VENDA_DATA', payload: data });
-    navigate('/editarVenda', {state:{ editData: data}});
-    console.log('Update clicked :'  + JSON.stringify(item));
+    navigate('/editarVenda', {state:{ editData: item.nota_fiscal}});
   };
 
 
@@ -149,6 +210,19 @@ const DisplayVendas = () => {
 
       if(response.status === 204){
         setProdutoDeletado(true)
+        toast.success('VENDA REMOVIDO COM SUCESSO!', {
+          position: 'top-right',
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          style: {
+            backgroundColor: '#78D6C6',
+            width: '575px', 
+            color: 'white'
+          },
+        });
       }
       else{
         console.log("Falha em deletar o produto")
@@ -181,12 +255,12 @@ const DisplayVendas = () => {
 
 
   return (
-    <div className="container-fluid mt-3">
-      <div className="d-flex justify-content-between">
+    <div className="container-fluid mt-5">
+      <div className="d-flex justify-content-between mb-5">
         <div> <h3 className='vendas_titulo'>Vendas Realizadas</h3></div>
         <div>
           <Link to="/novaVenda">
-          <button className='btn btn-primary'>Inserir Nova Venda</button>
+          <button className='btn btn-primary novavenda_link'>Inserir Nova Venda</button>
           </Link>
         </div> 
       </div>
@@ -224,7 +298,6 @@ const DisplayVendas = () => {
                 </td>
               </tr>
               {item.isExpanded && (
-              // <tr className="">
                 <td colspan="6">
                   <table className="table table-borderless">
                     <thead>
@@ -266,7 +339,7 @@ const DisplayVendas = () => {
                           <tbody></tbody>
                         </table>  
                 </td>
-              //  </tr>
+              
             )}
             </React.Fragment>
           ))}

@@ -11,7 +11,7 @@
     margin-left: 2rem;
     margin-bottom: 30px;
     font-size: 2rem;
-    color: #000000;
+    color:#00585E;
     ;
     max-height: 2rem;
     background: none;
@@ -19,7 +19,7 @@
   
   .sidebar-container {
     background-color: #F0F0F0;
-    width: 14rem;
+    width: 18rem;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -43,24 +43,27 @@
     height: 3rem;
     list-style: none;
     padding: 8px 0px 8px 16px;
-    border: 1px solid #ccc;
+    border: 1px solid whitesmoke;
     width: 100%;
+    background-color: whitesmoke;
+    box-shadow: 0.25rem 0.25rem 0.75rem rgb(0 0 0 / 0.15);
   }
   
   .sidebar-item a {
     text-decoration: none;
-    color: #000000;
+    color:#00585E;
     font-size: 1rem;
     height: 100%;
-    width: 90%;
+    width: 100%;
     display: flex;
     align-items: center;
     padding: 0 1.5rem;
     border-radius: 4px;
+    
   }
   
   .sidebar-item a:hover {
-    background-color: rgb(69, 69, 197);
+    background-color: #D4E2D4
   }
   
   .sidebar-items {
@@ -82,4 +85,7 @@
     color: #00585E;
     ;
   
+  }
+  .greaterSign{
+    color: gainsboro;
   }

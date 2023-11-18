@@ -126,7 +126,7 @@ def get_comissoes_por_periodo (request):
     )
     .values('id', 'nome', 'total_comissao', 'total_venda')
 )
-    print(list(results))
+    
     return JsonResponse(list(results), safe=False)
     
     

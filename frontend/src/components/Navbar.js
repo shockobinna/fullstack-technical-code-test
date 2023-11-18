@@ -8,12 +8,14 @@ import { SidebarData } from "./SidebarData";
 function Navbar() {
   const [sidebar, setSidebar] = useState(false);
   const location = useLocation();
+  const editData = location.state?.editData;
 
   const showSidebar = () => {
     setSidebar(!sidebar);
     
   };
 
+  
   // Function to get the title based on the current route
   const getTitle = () => {
     switch (location.pathname) {
@@ -22,7 +24,7 @@ function Navbar() {
       case "/comissao":
         return "Comissão";
       case "/editarVenda":
-        return "Alterar Venda";
+        return `Alterar Venda - ${editData || ''}`;
       case "/novaVenda":
         return "Nova Venda";
       
@@ -63,8 +65,9 @@ function Navbar() {
               >
                 <Link to={sidebaritem.path}>
                   {sidebaritem.icon}
-                  <span>{sidebaritem.title}</span>
+                  <span className="side">{sidebaritem.title}</span>
                 </Link>
+                < FaIcons.FaGreaterThan className="greaterSign"/>
               </li>
             );
           })}

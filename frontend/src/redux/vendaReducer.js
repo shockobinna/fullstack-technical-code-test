@@ -9,8 +9,7 @@ const initialState = {
 };
 
 const vendaReducer = (state = initialState, action) => {
-  // Implement your reducer logic based on the action type
-  // For example:
+  
   switch (action.type) {
     case 'UPDATE_VENDA_DATA':
       // Update state with fetched vendas
@@ -18,7 +17,7 @@ const vendaReducer = (state = initialState, action) => {
         ...state,
         vendas: action.payload.length > 0 ? JSON.parse(action.payload) : [],
       };
-    // Add other cases as needed
+    // Update state with fetched produtos
     case 'ADD_PRODUTOS':
       // Handle adding produtos
       return {

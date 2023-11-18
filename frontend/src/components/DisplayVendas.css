@@ -1,32 +1,25 @@
 .action-ver {
     margin-right: 15px; 
-    color: #055b05; 
+    color:#00585E; 
     cursor: pointer;
   }
   .action-edit {
     margin-right: 15px; 
-    color: #0033ff; 
+    color:#00585E; 
     cursor: pointer;
   }
   .action-delete {
     color: #ff0000; 
     cursor: pointer;
   }
-  .produto_servico{
-    width: 20%;
-  }
-  .produto_total{
-    width: 26%;
-    
-  }
-  .produto_comissao{
-    width: 12%;
-  }
-
-/* .vendas_titulo{
+  
+.novavenda_link{
+  margin-right: 100px;
+}
+.vendas_titulo{
   color:#00585E;
   ;
-} */
+}
 .btn-primary,
 .btn-primary:active,
 .btn-primary:visited {

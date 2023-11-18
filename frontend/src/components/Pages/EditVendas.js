@@ -11,6 +11,9 @@ import * as FaIcons from "react-icons/fa";
 function EditVendas() {
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+
   const [editProduto, setEditProduto] = useState([])
   const [editPessoa, setEditPessoa] = useState({})
   const [addProduto, setAddproduto] = useState({
@@ -66,10 +69,6 @@ const checkVendasParaEditar = () => {
   const clienteInfoArray = [];
 
   vendaArray.forEach((venda) => {
-
-    const numberOfVendas = vendaArray.length;
-    console.log(`Number of vendas: ${numberOfVendas}`);
-
     const clienteInfo = {
       vendedorId: venda.vendedor_id,
       nomeVendedor: venda.vendedor,
@@ -82,15 +81,11 @@ const checkVendasParaEditar = () => {
 
     clienteInfoArray.push(clienteInfo);
     
-    console.log(clienteInfoArray);
-    console.log(venda.produtos);
     const produtos = venda.produtos;
 
     if (produtos && produtos.length > 0) {
       produtos.forEach((code) => {
-        console.log(code.id);
-        console.log(code.quantidade);
-
+        
         // Create a new object for each product
         const produtoEdit = {
           id: code.id,
@@ -159,11 +154,10 @@ const checkVendasParaEditar = () => {
   //Deletar venda sendo cadastrada
   const handleEditDelete = (id) =>{
     const removedItem = editProduto.filter((item) => item.id !== id )
-    console.log(id)
     setEditProduto(removedItem)
-    axios.delete(`http://127.0.0.1:8000/produtosvendidos/${id}/`).
-    then(response => console.log(response)).
-    catch(error => console.log(error))
+    axios.delete(`http://127.0.0.1:8000/produtosvendidos/${id}/`)
+    .then()
+    .catch(error => console.log(error))
     
   }
   // Finalizar Compras
@@ -184,8 +178,8 @@ const checkVendasParaEditar = () => {
     }
     })
     .then(response => {
-      console.log(response)
-      navigate('/')
+      dispatch({ type: 'UPDATE_VENDA_DATA', payload: [] });
+      navigate('/', { state: { editResult: { success: true } } });
       
     })
     .catch(error =>{
@@ -198,8 +192,8 @@ const checkVendasParaEditar = () => {
   return (
     <div className="container-fluid mt-5 min-vh-100">
       <div className="row mb-5">
-        <div className="col-8">Produtos</div>
-        <div className="col-4">Dados da Venda</div>
+        <div className="col-8"><h3>Produtos</h3></div>
+        <div className="col-4"><h3>Dados da Venda</h3></div>
       </div>
 
       <div className="row">
@@ -294,12 +288,12 @@ const checkVendasParaEditar = () => {
                 />
               </div>
               <div className="form-group mb-4">
-                <label htmlFor="vendedor">Escolher um vendedor</label>
+                <label htmlFor="vendedor">Escolha um vendedor</label>
                 <select className="form-control form-select" 
                 id="vendedor"
                 value={editPessoa.vendedorId}
                 onChange={(e) => handlePessoa('vendedorId', e.target.value)}
-                defaultValue="vendedor"
+                // defaultValue="vendedor"
                 >
                   <option selected disabled value="">
                     {editPessoa.nomeVendedor}
@@ -312,12 +306,12 @@ const checkVendasParaEditar = () => {
                 </select>
               </div>
               <div className="form-group mb-5">
-                <label htmlFor="cliente">Escolher um cliente</label>
+                <label htmlFor="cliente">Escolha um cliente</label>
                 <select className="form-control form-select" 
                 id="cliente"
                 value={editPessoa.clienteId}
                 onChange={(e) => handlePessoa('clienteId', e.target.value)}
-                defaultValue="cliente"
+                // defaultValue="cliente"
                 >
                   <option selected disabled value="">
                     {editPessoa.nomeCliente}

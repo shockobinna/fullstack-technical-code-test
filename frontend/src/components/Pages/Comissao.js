@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify';
 import axios from "axios";
 import '../comissao.css'
 import * as FaIcons from "react-icons/fa";
@@ -34,7 +35,24 @@ function Comissao() {
   };
 
   const handleSearch = () => {
-    console.log(periodo.start_date, periodo.end_date)
+    if(periodo.start_date >periodo.end_date){
+      toast.info('A data de início não pode ser maior que a data de fim', {
+        position: 'top-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: '#78D6C6', // Set the background color
+          width: '575px', // Set the width
+          color: 'white'
+        },
+      })
+      
+    }
+    else{
+
     axios.get('http://127.0.0.1:8000/listcomissoes/',{
       params: {
         start_date: periodo.start_date,
@@ -44,14 +62,13 @@ function Comissao() {
     })
       .then(response => {
         setComissoesDetails(response.data)
-        console.log(response.data);
       })
       .catch(error => {
         // Handle errors
         console.error(error);
     })
 
-  
+    }
 
   }
     
