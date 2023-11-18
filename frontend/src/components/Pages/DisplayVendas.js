@@ -73,7 +73,7 @@ const DisplayVendas = () => {
         setToastDisplayed(true)
         return () => {
           // Cleanup function to clear the toast when the component unmounts
-          clearTimeout(toastId);
+          toast.dismiss(toastId);
         };
       } else if(!initialRender && isEditSuccess && !toastDisplayed){
 
@@ -95,7 +95,7 @@ const DisplayVendas = () => {
         setToastDisplayed(true)
         return () => {
           // Cleanup function to clear the toast when the component unmounts
-          clearTimeout(toastId);
+          toast.dismiss(toastId);
         };
 
       }
