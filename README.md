@@ -28,43 +28,45 @@ Make sure you have the following installed on your machine:
 - git clone https://github.com/shockobinna/fullstack-technical-code-test
 
 2. Change into the project directory: 
- ### cd papelaria
+- cd papelaria
 
 
 ### Backend Setup (Django)
 
 3. Create a virtual environment (recommended):
-### python -m venv venv
+- python -m venv venv
 
 4. Activate the virtual environment:
-    On Windows: venv\Scripts\activate
-    On macOS/Linux: source venv/bin/activate
+- On Windows: venv\Scripts\activate
+- On macOS/Linux: source venv/bin/activate
 
 
 5. Install backend dependencies:
-### pip install -r requirements.txt
+- pip install -r requirements.txt
 
 6. Apply database migrations:
-### python manage.py migrate
+- python manage.py migrate
 
 7. Create a superuser account (for Django admin access):
-### python manage.py createsuperuser
+- python manage.py createsuperuser
 
 
 8. Configure environment variables:
 - Create a .env file in the root directory with the following content:
 ### .env file
 
-# Django settings.py
-DJANGO_SECRET_KEY=your_secret_key
-DEBUG=True
+### Database settings
+- DB_NAME=your_database_name
+- DB_USER=your_database_user
+- DB_PASSWORD=your_database_password
+- DB_HOST=your_database_host
+- DB_PORT=your_database_port
 
-# Database settings
-DB_NAME=your_database_name
-DB_USER=your_database_user
-DB_PASSWORD=your_database_password
-DB_HOST=your_database_host
-DB_PORT=your_database_port
+### Django settings.py
+- DJANGO_SECRET_KEY=your_secret_key
+- DEBUG=True
+
+
 
 
 Run the Django development server:
@@ -73,14 +75,14 @@ python manage.py runserver
 
 9. Frontend Setup (React)
 Change into the frontend directory:
-### cd frontend
-### npm install
-### npm start
+- cd frontend
+- npm install
+- npm start
 
 
-Accessing the Application
-Backend: http://localhost:8000/
-Frontend: http://localhost:3000/
+### Accessing the Application
+- Backend: http://localhost:8000/
+- Frontend: http://localhost:3000/
 
 
 ## Additional Notes
