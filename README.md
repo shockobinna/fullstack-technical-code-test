@@ -3,7 +3,8 @@ A full-stack job position test code using Django and React.js
 
 # Papelaria
 
-Papelaria is a project developed using Django 4.2.7 and React. It is designed for [provide a brief description of the project's purpose].
+Papelaria is a project developed using Django 4.2.7 and React. It is designed to realise CRUD operations which involves saving sales, editing sales, deleting and displaying sales giving real time updates on sales, a particular sale details, customers and the seller who made the sales.
+It is also provides the functionality of returning the total sales commission to be paid or paid to every seller over a certain time interval.
 
 ## Getting Started
 
@@ -69,20 +70,24 @@ Make sure you have the following installed on your machine:
 
 
 
-Run the Django development server:
-python manage.py runserver
+9. Run the Django development server:
+- python manage.py runserver
 
 
-9. Frontend Setup (React)
+10. Frontend Setup (React)
 Change into the frontend directory:
+- Open another terminal
 - cd frontend
 - npm install
 - npm start
 
 
 ### Accessing the Application
+Your application should open up on your browser.
 - Backend: http://localhost:8000/
 - Frontend: http://localhost:3000/
+
+
 
 
 ## Additional Notes
