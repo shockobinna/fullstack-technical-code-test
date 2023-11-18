@@ -12,36 +12,18 @@ const DisplayVendas = () => {
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
-  const vendaData = useSelector(state => state.venda);
-  const produtosData = useSelector(state => state.produtos);
-  const clientesData = useSelector(state => state.clientes);
-  const vendedoresData = useSelector(state => state.vendedores);
-  console.log('Current state in the store:', vendaData, vendaData.vendas.length);
-  console.log('Current produtos in the store:', produtosData, produtosData.produtos.length);
-  console.log('Current state in the store:', clientesData, clientesData.clientes.length);
-  console.log('Current state in the store:', vendedoresData, vendedoresData.vendedores.length);
 
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [salesData, setSalesData] = useState([]);
   const [produtoId, setProdutoId] = useState(null)
   const [produtoDeletado, setProdutoDeletado] = useState(false)
-  const [produtos, setProdutos] = useState([])
-  const [clientes, setClientes] = useState([])
-  const [vendedores, setVendedores] = useState([])
   const [initialRender, setInitialRender] = useState(true); // logica para a função fetchVendas  funcionar quando o componente é renderizado
   const [totalsForRow, setTotalsForRow] = useState({
     totalQuantidade: 0,
     totalRowProduto: 0,
     totalComissao: 0
   });
-  useEffect(() => {
-
-    dispatch(updateVendaData([]))
   
-    
-  }, [dispatch])
-  
-
   useEffect(() => {
 
     if(initialRender){
@@ -64,6 +46,7 @@ const DisplayVendas = () => {
     await axios.get('http://127.0.0.1:8000/listallvendas/')
     .then(response => {
       setSalesData(response.data);
+      console.log(response.data.length)
     })
     .catch(error => {
       console.error('Error fetching sales data:', error);
@@ -80,9 +63,7 @@ const DisplayVendas = () => {
         codigo: produto.codigo, // Add the product code to the option for filtering
       }));
       dispatch({ type: 'ADD_PRODUTOS', payload: response.data });
-      // setProdutoSerachList(formattedOptions);
-      setProdutos(response.data);
-      console.log(response.data);
+      dispatch({ type: 'SEARCH_PRODUTO', payload: formattedOptions });
       
     } catch (error) {
       console.error("Error fetching data1:", error);
@@ -93,8 +74,7 @@ const DisplayVendas = () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/clientes/");
       dispatch({ type: 'ADD_CLIENTES', payload: response.data });
-      setClientes(response.data);
-      console.log(response.data);
+      
     } catch (error) {
       console.error("Error fetching data1:", error);
     }
@@ -104,8 +84,7 @@ const DisplayVendas = () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/vendedores/");
       dispatch({ type: 'ADD_VENDEDORES', payload: response.data });
-      setVendedores(response.data);
-      console.log(response.data);
+      
     } catch (error) {
       console.error("Error fetching data1:", error);
     }
@@ -126,7 +105,7 @@ const DisplayVendas = () => {
     // Add code to handle "Update" action here
     const data = JSON.stringify(item)
     dispatch({ type: 'UPDATE_VENDA_DATA', payload: data });
-    navigate('/novaVenda', {state:{ editData: data}});
+    navigate('/editarVenda', {state:{ editData: data}});
     console.log('Update clicked :'  + JSON.stringify(item));
   };
 
@@ -187,11 +166,6 @@ const DisplayVendas = () => {
     setDeleteModalOpen(false);
   };
 
-  const handleNovaVendaClick = () => {
-    // Call updateTitle with the desired text
-    // updateTitle('Nova Venda');
-  };
-
   const formatarData =(data)=>{
    const formatada = new Date(data).toLocaleString('pt-BR', {
       day: 'numeric',
@@ -205,22 +179,18 @@ const DisplayVendas = () => {
     return formatada 
   }
 
-  
-
-  
-  
 
   return (
     <div className="container-fluid mt-3">
       <div className="d-flex justify-content-between">
-        <div> <h3>Vendas Realizadas</h3></div>
+        <div> <h3 className='vendas_titulo'>Vendas Realizadas</h3></div>
         <div>
-          <Link to="/novaVenda" onClick={handleNovaVendaClick}>
-          <button className='btn btn-secondary'>Inserir Nova Venda</button>
+          <Link to="/novaVenda">
+          <button className='btn btn-primary'>Inserir Nova Venda</button>
           </Link>
         </div> 
       </div>
-      <table className="table">
+      <table className="table table-light">
         <thead>
           <tr>
             <th>Nota Fiscal</th>

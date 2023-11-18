@@ -19,3 +19,8 @@ export const addVendedores = (vendedorData) => ({
   type: 'ADD_VENDEDORES',
   payload: vendedorData,
 });
+
+export const searchProduto = (produtoFormatado) => ({
+  type: 'SEARCH_PRODUTO',
+  payload: produtoFormatado,
+});

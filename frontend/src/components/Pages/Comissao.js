@@ -19,17 +19,11 @@ function Comissao() {
       (acc, comissao) => acc + parseFloat(comissao.total_comissao),
       0
     );
-    setTotalComissao(newTotal);
+    setTotalComissao(newTotal.toFixed(2));
     
   }, [comissoesDetails])
 
-  // useEffect(() => {
-  //   const newTotal = editProduto.reduce(
-  //     (acc, produto) => acc + produto.total,
-  //     0
-  //   );
-  //   setTotal(newTotal);
-  // }, [editProduto]);
+
   
 
   const handleDate = (field, value) => {
@@ -62,7 +56,7 @@ function Comissao() {
   }
     
   return (
-    <div className='container-fluid mt-5'>
+    <div className='container-fluid mt-5 min-vh-100'>
         <div className='row mb-5'>
           <div className='col-6'>
           <h3>Relatório de Comissões</h3>
@@ -96,8 +90,9 @@ function Comissao() {
         </div>
         </div>
         <div className='row'>
+          <div className='col'>
           { comissoesDetails.length > 0 ? (
-        <table className="table">
+        <table className="table table-light">
           <thead>
             <tr>
               <th scope="col">Cód.</th>
@@ -117,17 +112,16 @@ function Comissao() {
                   </tr>
               </React.Fragment>
             ))
-            
-}
+            }
           </tbody>
           <tfoot>
           <tr>
             <td colSpan="4">
-          <table className='table'>
+          <table className='table table-light'>
             <thead>
-              <tr>
-                <th colSpan="2"scope="col">Total de comissão de período</th>
-                <th colSpan="2"scope="col">R${totalComissao}</th>
+              <tr colSpan="">
+                <th colSpan=""scope="col">Total de comissão de período</th>
+                <th colSpan=""scope="col">R${totalComissao}</th>
 
               </tr>
             </thead>
@@ -147,6 +141,7 @@ function Comissao() {
             </div>
           )
           }
+          </div>
         </div>
     </div>
   )

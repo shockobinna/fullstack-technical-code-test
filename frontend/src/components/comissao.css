@@ -29,3 +29,7 @@
 /* table td:nth-child(3),table td:nth-child(4) {
     padding-left: 50px;
   } */
+
+  table tfoot td{
+    border-bottom: none;
+  }

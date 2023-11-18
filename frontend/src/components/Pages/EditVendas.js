@@ -1,41 +1,52 @@
 import React, { useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
+import { useDispatch,useSelector } from 'react-redux';
 import "../CadastrarVenda.css";
 import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
 
 
-function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorCliente, produtoSearchList, produtos}) {
+// function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorCliente, produtoSearchList, produtos}) {
+function EditVendas() {
 
   const navigate = useNavigate();
   const [editProduto, setEditProduto] = useState([])
   const [editPessoa, setEditPessoa] = useState({})
   const [addProduto, setAddproduto] = useState({
     produto_id: null,
-    quantidade: 0,
+    quantidade: null,
   })
+  const [currentDateTime, setCurrentDateTime] = useState("");
   const [total, setTotal] = useState(0); // Dynamically calculates invoice total
-  const [timeNow, setTimeNow] = useState("")
+  // const [timeNow, setTimeNow] = useState("")
+  const editVendas = useSelector(state => state.venda || []);
+  const produtosData = useSelector(state => state.produtos['produtos'][0] || []);
+  const clientesData = useSelector(state => state.clientes['clientes'][0] || []);
+  const vendedoresData = useSelector(state => state.vendedores['vendedores'][0] || []);
+  const produtoSearchList = useSelector(state => state.produtoFormatado['produtoFormatado'][0] || [])
+ 
+
   
 
   useEffect(() => {
-    setEditProduto([...displayprodutoSelected])
-    setEditPessoa({...vendedorCliente})
     
-  }, [displayprodutoSelected,vendedores,clientes])
+    checkVendasParaEditar()
+    
+  }, [editVendas,vendedoresData,clientesData,produtoSearchList,produtosData])
+
 
   useEffect(() => {
-    setTimeNow(getFullDateTime());
+    setCurrentDateTime(getFullDateTime());
 
     // Update every second
     const intervalId = setInterval(() => {
-      setTimeNow(getFullDateTime());
+      setCurrentDateTime(getFullDateTime());
     }, 1000);
 
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
-  }, [timeNow]);
+  }, [currentDateTime]);
 
   useEffect(() => {
     const newTotal = editProduto.reduce(
@@ -49,6 +60,60 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
 
 //   // ***************Functions*******************
 
+const checkVendasParaEditar = () => {
+  const vendaArray = Object.values(editVendas);
+  const updatedSelectedProdutos = [];
+  const clienteInfoArray = [];
+
+  vendaArray.forEach((venda) => {
+
+    const numberOfVendas = vendaArray.length;
+    console.log(`Number of vendas: ${numberOfVendas}`);
+
+    const clienteInfo = {
+      vendedorId: venda.vendedor_id,
+      nomeVendedor: venda.vendedor,
+      clienteId: venda.cliente_id,
+      nomeCliente: venda.cliente,
+      vendaId: venda.id,
+      notaFiscal: venda.nota_fiscal,
+      datetime: venda.datetime
+    };
+
+    clienteInfoArray.push(clienteInfo);
+    
+    console.log(clienteInfoArray);
+    console.log(venda.produtos);
+    const produtos = venda.produtos;
+
+    if (produtos && produtos.length > 0) {
+      produtos.forEach((code) => {
+        console.log(code.id);
+        console.log(code.quantidade);
+
+        // Create a new object for each product
+        const produtoEdit = {
+          id: code.id,
+          produto_id: code.produto_id,
+          codigo: code.codigo,
+          descricao: code.descricao,
+          percentual_comissao: code.percentual_comissao,
+          preco: code.valor_unitario,
+          quantidade: code.quantidade,
+          total: code.quantidade * code.valor_unitario,
+          comissao_configurada : code.comissao_configurada,
+          comissao_a_receber : code.comissao_a_receber
+        };
+        updatedSelectedProdutos.push(produtoEdit);
+      });
+    }
+  });
+
+  setEditProduto(updatedSelectedProdutos);
+  setEditPessoa(clienteInfoArray[0]);
+
+};
+
   const handleInputChange = (field, value) => {
     setAddproduto((prevValues) => ({
       ...prevValues,
@@ -61,39 +126,6 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
       ...prevValues,
       [field]: value,
     }));
-  };
-
-  const handleEditAddicionar = () => {
-    // if(produtos){
-      console.log(produtoSearchList)
-      console.log(addProduto)
-      console.log(editProduto)
-    const produto_a_editar = produtos.find(
-      (produto) => produto.id === addProduto.produto_id['value']
-    );
-    console.log(produto_a_editar);
-    if (produto_a_editar) {
-
-      const obj = {
-              id: produto_a_editar.id,
-              codigo: produto_a_editar.codigo,
-              descricao: produto_a_editar.descricao,
-              percentual_comissao: produto_a_editar.percentual_comissao,
-              preco: produto_a_editar.valor_unitario,
-              quantidade: addProduto.quantidade,
-              total: addProduto.quantidade * produto_a_editar.valor_unitario,
-      };
-
-      setEditProduto((prevData) => [...prevData, obj]);
-
-      setAddproduto({
-        produto_id: null,
-        quantidade: 0,
-      });
-    } else {
-      console.log("Produto não existe");
-    }
-  // }
   };
 
   // Function to get current date and time as a string
@@ -164,7 +196,7 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
 
 
   return (
-    <div className="container-fluid mt-5">
+    <div className="container-fluid mt-5 min-vh-100">
       <div className="row mb-5">
         <div className="col-8">Produtos</div>
         <div className="col-4">Dados da Venda</div>
@@ -188,6 +220,7 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                       indicatorSeparator: () => ({ display: "none" }),
                       dropdownIndicator: () => ({ display: "none" }),
                     }}
+                    isDisabled
                   />
                 </div>
                 <div className="col-2">
@@ -200,13 +233,14 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                     onChange={(e) =>
                       handleInputChange("quantidade", e.target.value)
                     }
+                    disabled
                   />
                 </div>
                 <div className="col-2 mt-4 text-center">
                   <button
                     type="button"
                     className="btn btn-secondary ml-3"
-                    onClick={handleEditAddicionar}
+                    // onClick={handleEditAddicionar}
                     disabled={!areFieldsFilled()}
                   >
                     Adicionar
@@ -218,7 +252,7 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
 
           <div className="row">
             <div className="col table-responsive">
-              <table className="table table-borderless produto_table">
+              <table className="table table-borderless produto_table table-light">
                 <thead>
                   <tr>
                     <th scope="col">Produtos/Serviços</th>
@@ -254,7 +288,7 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                 <label htmlFor="date">Data e Hora da Venda</label>
                 <input
                   type="text"
-                  value={timeNow}
+                  value={currentDateTime}
                   className="form-control"
                   disabled
                 />
@@ -265,12 +299,12 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                 id="vendedor"
                 value={editPessoa.vendedorId}
                 onChange={(e) => handlePessoa('vendedorId', e.target.value)}
-                defaultValue=""
+                defaultValue="vendedor"
                 >
                   <option selected disabled value="">
                     {editPessoa.nomeVendedor}
                   </option>
-                  {vendedores.map((vendedor) => (
+                  {vendedoresData.map((vendedor) => (
                     <option key={vendedor.id} value={vendedor.id}>
                       {vendedor.nome}
                     </option>
@@ -283,12 +317,12 @@ function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorClien
                 id="cliente"
                 value={editPessoa.clienteId}
                 onChange={(e) => handlePessoa('clienteId', e.target.value)}
-                defaultValue=""
+                defaultValue="cliente"
                 >
                   <option selected disabled value="">
                     {editPessoa.nomeCliente}
                   </option>
-                  {clientes.map((cliente) => (
+                  {clientesData.map((cliente) => (
                     <option key={cliente.id} value={cliente.id}>
                       {cliente.nome}
                     </option>

@@ -4,7 +4,8 @@ const initialState = {
   vendas: [],
   produtos:[],
   clientes:[],
-  vendedores:[]
+  vendedores:[],
+  produtoFormatado : []
 };
 
 const vendaReducer = (state = initialState, action) => {
@@ -37,6 +38,13 @@ const vendaReducer = (state = initialState, action) => {
       return {
         ...state,
         vendedores: [...state.vendedores, action.payload],
+      };
+
+    case 'SEARCH_PRODUTO':
+      // Handle adding vendedores
+      return {
+        ...state,
+        produtoFormatado: [...state.produtoFormatado, action.payload],
       };
     default:
       return state;

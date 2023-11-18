@@ -24,7 +24,7 @@ function Navbar() {
       case "/editarVenda":
         return "Alterar Venda";
       case "/novaVenda":
-        return "Nova";
+        return "Nova Venda";
       
       default:
         return "Vendas";

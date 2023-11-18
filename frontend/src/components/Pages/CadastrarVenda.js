@@ -4,98 +4,28 @@ import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
 import { useDispatch,useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import EditVendas from "./EditVendas";
-// import { useLocation } from 'react-router-dom';
+
 
 function CadastrarVenda() {
-  const [produtos, setProdutos] = useState([]); // All produtos from the backend
+
+    // from redux store [produtos, clientes,vendedores, produtoSearchList]
+  const produtos = useSelector(state => state.produtos['produtos'][0] || []);
+  const clientes = useSelector(state => state.clientes['clientes'][0] || []);
+  const vendedores = useSelector(state => state.vendedores['vendedores'][0] || []);
+  const produtoSearchList = useSelector(state => state.produtoFormatado['produtoFormatado'][0] || [])
+  
   const [displayprodutoSelected, setDisplayProdutoSelected] = useState([]); // Display produto in the table
-  const [produtoSearchList, setProdutoSerachList] = useState([]); // produto displayed in the search following figma design
   const [selectedProdutos, setSelectedProdutos] = useState({
     produto_id: '',
-    quantidade: 0,
+    quantidade: null,
   }); // selected produto id for query in the produtos state and also for adicionar button disable logic
-  const [clientes, setClientes] = useState([]);
-  const [vendedores, setVendedores] = useState([]);
   const [currentDateTime, setCurrentDateTime] = useState("");
   const [invoiceDetailField, setInvoiceDetailField] = useState({
     cliente_id: '',
     vendedor_id: '',
   }) // Finalizar button disabled and abled logic
   const [total, setTotal] = useState(0); // Dynamically calculates invoice total
-  const editVendas = useSelector(state => state.venda || []);
-  const navigate = useNavigate()
-  // const [editVendas, setEditVendas] = useState(useSelector(state => state.venda || [])); // Use a state to hold the parsed editData
-  const [pessoal, setPessoal] = useState({
-    vendedorId: '',
-    nomeVendedor:'',
-    clienteId:'',
-    nomeCliente: '',
-    vendaId:'',
-    notaFiscal:''
-  })
-
-  const [paraEditar, setParaEditar] = useState([])
   
-
-  
-
- 
-  useEffect(() => {
-    // Fetch all produtos data when the component mounts
-    const fetchProdutos = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/produtos/");
-
-        const formattedOptions = response.data.map((produto) => ({
-          value: produto.id,
-          label: `${produto.codigo} - ${produto.descricao}`,
-          codigo: produto.codigo, // Add the product code to the option for filtering
-        }));
-
-        setProdutoSerachList(formattedOptions);
-        setProdutos(response.data);
-        console.log(response.data);
-        
-      } catch (error) {
-        console.error("Error fetching data1:", error);
-      }
-    };
-    
-
-    fetchProdutos();
-  }, [editVendas]); // Empty dependency array to ensure the effect runs only once
-
-  useEffect(() => {
-    // Fetch all clientes data when the component mounts
-    const fetchClientes = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/clientes/");
-        setClientes(response.data);
-        console.log(response.data);
-      } catch (error) {
-        console.error("Error fetching data1:", error);
-      }
-    };
-
-    fetchClientes();
-  }, [editVendas]); // Empty dependency array to ensure the effect runs only once
-
-  useEffect(() => {
-    // Fetch all clientes data when the component mounts
-    const fetchVendedores = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/vendedores/");
-        setVendedores(response.data);
-        console.log(response.data);
-      } catch (error) {
-        console.error("Error fetching data1:", error);
-      }
-    };
-
-    fetchVendedores();
-  }, [editVendas]); // Empty dependency array to ensure the effect runs only once
   
 
   useEffect(() => {
@@ -110,12 +40,6 @@ function CadastrarVenda() {
     return () => clearInterval(intervalId);
   }, [currentDateTime]);
 
-  useEffect(() => {
-    console.log(editVendas.vendas.length)
-    
-        checkVendasParaEditar();
-        
-  }, [editVendas]);
 
   // Recalculate the invoice total value whenever the total changes
   useEffect(() => {
@@ -126,67 +50,9 @@ function CadastrarVenda() {
     setTotal(newTotal);
   }, [displayprodutoSelected]);
 
-  // Change the URL based on the condition
-  // React.useEffect(() => {
-  //   const newPath = isEditing ? '/editarVenda' : '/novaVenda';
-  //   navigate(newPath);
-  // }, [isEditing, navigate, paraEditar, editVendas]);
-  
-
-  
-
   
   // ***************Functions*******************
 
-  const checkVendasParaEditar = () => {
-    
-    const vendaArray = Object.values(editVendas);
-    const updatedSelectedProdutos = [];
-
-    vendaArray.forEach((venda) => {
-      setPessoal({
-        vendedorId:venda.vendedor_id,
-        nomeVendedor:venda.vendedor,
-        clienteId:venda.cliente_id,
-        nomeCliente: venda.cliente,
-        vendaId: venda.id,
-        notaFiscal : venda.nota_fiscal,
-        datetime :  venda.datetime
-      })
-      console.log(venda.produtos);
-      const produtos = venda.produtos;
-
-      if (produtos && produtos.length > 0) {
-        produtos.forEach((code) => {
-          console.log(code.id);
-          console.log(code.quantidade);
-
-          // Create a new object for each product
-          const produtoEdit = {
-            id: code.id,
-            produto_id: code.produto_id,
-            codigo: code.codigo,
-            descricao: code.descricao,
-            percentual_comissao: code.percentual_comissao,
-            preco: code.valor_unitario,
-            quantidade: code.quantidade,
-            total: code.quantidade * code.valor_unitario,
-            comissao_configurada : code.comissao_configurada,
-            comissao_a_receber : code.comissao_a_receber
-          };
-          updatedSelectedProdutos.push(produtoEdit);
-        });
-      }
-    });
-
-    // Update the displayProdutoSelected state once outside the loops
-    // setDisplayProdutoSelected(updatedSelectedProdutos);
-    setParaEditar(updatedSelectedProdutos);
-    console.log('Products to edit:', updatedSelectedProdutos);
-    console.log('displayed to edit:', paraEditar);
-    
-  
-};
 
   const filterOptions = ({ label, value, codigo }, inputValue) => {
     const searchValue = inputValue.toLowerCase();
@@ -290,7 +156,7 @@ function CadastrarVenda() {
       'Content-Type': 'multipart/form-data',
     })
     .then(response => {
-      setProdutos(response.data)
+      // setProdutos(response.data)
       setDisplayProdutoSelected([])
       setSelectedProdutos({
         produto_id: null,
@@ -309,174 +175,162 @@ function CadastrarVenda() {
 
 
   return (
-    <div>{
-      paraEditar.length > 0  ?(
-        <EditVendas
-        produtos = {produtos}
-        displayprodutoSelected={paraEditar}
-        clientes = {clientes}
-        vendedores = {vendedores}
-        vendedorCliente = {pessoal}
-        produtoSearchList = {produtoSearchList}
-        ></EditVendas>
-      ):(
-      
-      
-    <div className="container-fluid mt-5">
-      <div className="row mb-5">
-        <div className="col-8">Produtos</div>
-        <div className="col-4">Dados da Venda</div>
-      </div>
+    <div>{  
+      <div className="container-fluid mt-5 min-vh-100">
+        <div className="row mb-5">
+          <div className="col-8">Produtos</div>
+          <div className="col-4">Dados da Venda</div>
+        </div>
 
-      <div className="row">
-        <div className="col-8">
-          <div className="">
-            <form>
-              <div className="row mb-5">
-                <div className="col-6">
-                  <label>Buscar pelo código de barra ou descrição</label>
-                  <Select
-                    options={produtoSearchList}
-                    value={selectedProdutos.produto_id}
-                    onChange={(value) => handleInputChange("produto_id", value)}
-                    filterOption={filterOptions}
-                    isSearchable
-                    placeholder="Digite o código ou o nome do produto"
-                    styles={{
-                      indicatorSeparator: () => ({ display: "none" }),
-                      dropdownIndicator: () => ({ display: "none" }),
-                    }}
-                  />
+        <div className="row">
+          <div className="col-8">
+            <div className="">
+              <form>
+                <div className="row mb-5">
+                  <div className="col-6">
+                    <label>Buscar pelo código de barra ou descrição</label>
+                    <Select
+                      options={produtoSearchList}
+                      value={selectedProdutos.produto_id}
+                      onChange={(value) => handleInputChange("produto_id", value)}
+                      filterOption={filterOptions}
+                      isSearchable
+                      placeholder="Digite o código ou o nome do produto"
+                      styles={{
+                        indicatorSeparator: () => ({ display: "none" }),
+                        dropdownIndicator: () => ({ display: "none" }),
+                      }}
+                    />
+                  </div>
+                  <div className="col-2">
+                    <label htmlFor="quantidade">Quantidade de Itens</label>
+                    <input
+                      type="number"
+                      className="form-control quant"
+                      value={selectedProdutos.quantidade}
+                      // placeholder="0"
+                      onChange={(e) =>
+                        handleInputChange("quantidade", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-2 mt-4 text-center">
+                    <button
+                      type="button"
+                      className="btn btn-secondary ml-3"
+                      onClick={handleAddicionar}
+                      disabled={!areFieldsFilled()}
+                    >
+                      Adicionar
+                    </button>
+                  </div>
                 </div>
-                <div className="col-2">
-                  <label htmlFor="quantidade">Quantidade de Itens</label>
-                  <input
-                    type="number"
-                    className="form-control quant"
-                    value={selectedProdutos.quantidade}
-                    // placeholder="0"
-                    onChange={(e) =>
-                      handleInputChange("quantidade", e.target.value)
-                    }
-                  />
-                </div>
-                <div className="col-2 mt-4 text-center">
-                  <button
-                    type="button"
-                    className="btn btn-secondary ml-3"
-                    onClick={handleAddicionar}
-                    disabled={!areFieldsFilled()}
-                  >
-                    Adicionar
-                  </button>
-                </div>
+              </form>
+            </div>
+
+            <div className="row">
+              <div className="col table-responsive">
+                <table className="table table-borderless produto_table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Produtos/Serviços</th>
+                      <th scope="col">Quantidade</th>
+                      <th scope="col">Preço unitário</th>
+                      <th scope="col">Total</th>
+                      <th scope="col"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayprodutoSelected.map((item) => (
+                      <React.Fragment key={item.id}>
+                        <tr>
+                          <td>
+                            {item.codigo}-{item.descricao}
+                          </td>
+                          <td>{item.quantidade}</td>
+                          <td> R${item.valor_unitario}</td>
+                          <td> R${item.total}</td>
+                          <td> <i className="action-delete" onClick={ () => handleDelete(item.id)}><FaIcons.FaTrash /> </i> </td>
+                        </tr>
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </form>
+            </div>
           </div>
+          <div className="col-3 dados">
+            <div className="">
+              <form>
+                <div className="form-group mb-4">
+                  <label htmlFor="date">Data e Hora da Venda</label>
+                  <input
+                    type="text"
+                    value={currentDateTime}
+                    className="form-control"
+                    disabled
+                  />
+                </div>
+                <div className="form-group mb-4">
+                  <label htmlFor="vendedor">Escolher um vendedor</label>
+                  <select className="form-control form-select" 
+                  id="vendedor"
+                  value={invoiceDetailField.vendedor_id}
+                  onChange={(e) => handleFinalizeChange('vendedor_id', e.target.value)}
+                  defaultValue=""
+                  >
+                    <option selected disabled value="">
+                      Selecione o nome
+                    </option>
+                    {vendedores.map((vendedor) => (
+                      <option key={vendedor.id} value={vendedor.id}>
+                        {vendedor.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group mb-5">
+                  <label htmlFor="cliente">Escolher um cliente</label>
+                  <select className="form-control form-select" 
+                  id="cliente"
+                  value={invoiceDetailField.cliente_id}
+                  onChange={(e) => handleFinalizeChange('cliente_id', e.target.value)}
+                  defaultValue=""
+                  >
+                    <option selected disabled value="">
+                      Selecione o nome
+                    </option>
+                    {clientes.map((cliente) => (
+                      <option key={cliente.id} value={cliente.id}>
+                        {cliente.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div className="row">
-            <div className="col table-responsive">
-              <table className="table table-borderless produto_table">
-                <thead>
-                  <tr>
-                    <th scope="col">Produtos/Serviços</th>
-                    <th scope="col">Quantidade</th>
-                    <th scope="col">Preço unitário</th>
-                    <th scope="col">Total</th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayprodutoSelected.map((item) => (
-                    <React.Fragment key={item.id}>
-                      <tr>
-                        <td>
-                          {item.codigo}-{item.descricao}
-                        </td>
-                        <td>{item.quantidade}</td>
-                        <td> R${item.valor_unitario}</td>
-                        <td> R${item.total}</td>
-                        <td> <i className="action-delete" onClick={ () => handleDelete(item.id)}><FaIcons.FaTrash /> </i> </td>
-                      </tr>
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
+                <div className="row mb-5">
+                  <div className="col">Valor total da venda:</div>
+                  <div className="col text-end">R$ {total}</div>
+                </div>
+
+                <div className="row">
+                  <div className="col">
+                    <button className="btn btn-secondary">Cancelar</button>
+                  </div>
+                  <div className="col text-end">
+                    <button className="btn btn-secondary"
+                    onClick={handleSubmit}
+                    disabled={!areInvoiceFieldsFilled()}
+                    >
+                      Finalizar</button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-        <div className="col-3 dados">
-          <div className="">
-            <form>
-              <div className="form-group mb-4">
-                <label htmlFor="date">Data e Hora da Venda</label>
-                <input
-                  type="text"
-                  value={currentDateTime}
-                  className="form-control"
-                  disabled
-                />
-              </div>
-              <div className="form-group mb-4">
-                <label htmlFor="vendedor">Escolher um vendedor</label>
-                <select className="form-control form-select" 
-                id="vendedor"
-                value={invoiceDetailField.vendedor_id}
-                onChange={(e) => handleFinalizeChange('vendedor_id', e.target.value)}
-                defaultValue=""
-                >
-                  <option selected disabled value="">
-                    Selecione o nome
-                  </option>
-                  {vendedores.map((vendedor) => (
-                    <option key={vendedor.id} value={vendedor.id}>
-                      {vendedor.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group mb-5">
-                <label htmlFor="cliente">Escolher um cliente</label>
-                <select className="form-control form-select" 
-                id="cliente"
-                value={invoiceDetailField.cliente_id}
-                onChange={(e) => handleFinalizeChange('cliente_id', e.target.value)}
-                defaultValue=""
-                >
-                  <option selected disabled value="">
-                    Selecione o nome
-                  </option>
-                  {clientes.map((cliente) => (
-                    <option key={cliente.id} value={cliente.id}>
-                      {cliente.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="row mb-5">
-                <div className="col">Valor total da venda:</div>
-                <div className="col text-end">R$ {total}</div>
-              </div>
-
-              <div className="row">
-                <div className="col">
-                  <button className="btn btn-secondary">Cancelar</button>
-                </div>
-                <div className="col text-end">
-                  <button className="btn btn-secondary"
-                  onClick={handleSubmit}
-                  disabled={!areInvoiceFieldsFilled()}
-                  >
-                    Finalizar</button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
       </div>
-    </div>
-    )}
+    }
     </div>
   );
 }

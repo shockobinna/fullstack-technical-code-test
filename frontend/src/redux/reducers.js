@@ -7,6 +7,7 @@ const rootReducer = combineReducers({
   produtos: vendaReducer,
   clientes: vendaReducer,
   vendedores: vendaReducer,
+  produtoFormatado : vendaReducer,
   // Add other reducers if needed
 });
 

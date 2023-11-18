@@ -1,7 +1,8 @@
 from django.http import HttpResponse
 from django.db.models import Sum, F, Count
 from django.http import JsonResponse
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.utils import timezone
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
@@ -104,24 +105,28 @@ def get_vendas_with_produto_details(request):
 @api_view(['GET'])
 
 def get_comissoes_por_periodo (request):
-    start_date = request.query_params.get('start_date')
-    end_date = request.query_params.get('end_date')
+    start_date_str = request.query_params.get('start_date')
+    end_date_str = request.query_params.get('end_date')
 
-    # Filter sales data based on the date range
-    sales_within_date_range = Venda.objects.filter(datetime__range=(start_date, end_date))
+    start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
 
-    # Calculate total comissao and total venda for each vendedor within the date range
+    # Convert dates to UTC if needed
+    start_datetime_utc = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+    end_datetime_utc = timezone.make_aware(datetime.combine(end_date, datetime.max.time()))
+
+    # Adjust filter to include only records on or after the start date and before the day or after the end date
+    sales_within_date_range = Venda.objects.filter(datetime__gte=start_datetime_utc, datetime__lte=end_datetime_utc)
+    
     results = (
     Vendedor.objects.filter(venda__in=sales_within_date_range)
     .annotate(
-        total_comissao=Sum(F('venda__produtovendido__comissao') * F('venda__produtovendido__quantidade'), default=0),
-        total_venda=Count('venda__id')
+        total_comissao=Sum(F('venda__produtovendido__comissao'), default=0),
+        total_venda=Count('venda')
     )
     .values('id', 'nome', 'total_comissao', 'total_venda')
 )
     print(list(results))
-    # Serialize the results and convert to JSON
-    # serializer = VendedorSerializer(results, many=True)
     return JsonResponse(list(results), safe=False)
     
     

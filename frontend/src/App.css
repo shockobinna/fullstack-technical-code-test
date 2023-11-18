@@ -58,6 +58,10 @@ body {
   width: 100vw;
   height: 100vh;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background-color: #F0F0F0;
+}
+.App{
+  background: #F0F0F0;
 }
 
 /* .comp {
