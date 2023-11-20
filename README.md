@@ -87,6 +87,13 @@ Your application should open up on your browser.
 - Backend: http://localhost:8000/
 - Frontend: http://localhost:3000/
 
+### Add some data to the models in Admin
+
+- Open another browsing tap and type in : http://localhost:8000/admin
+- Enter your email and password created in step 7
+- Add some data to the models  
+- Go back to : http://localhost:3000/, refresh the page and you should be good to go.
+
 
 
 
