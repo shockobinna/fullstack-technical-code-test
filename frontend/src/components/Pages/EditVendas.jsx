@@ -1,43 +1,48 @@
-import React, { useEffect, useState} from "react";
-import { useNavigate } from 'react-router-dom';
-import { useDispatch,useSelector } from 'react-redux';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import "../CadastrarVenda.css";
 import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
 
-
 // function EditVendas({displayprodutoSelected, clientes, vendedores, vendedorCliente, produtoSearchList, produtos}) {
 function EditVendas() {
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
 
-  const [editProduto, setEditProduto] = useState([])
-  const [editPessoa, setEditPessoa] = useState({})
+  const [editProduto, setEditProduto] = useState([]);
+  const [editPessoa, setEditPessoa] = useState({});
   const [addProduto, setAddproduto] = useState({
     produto_id: null,
     quantidade: null,
-  })
+  });
   const [currentDateTime, setCurrentDateTime] = useState("");
   const [total, setTotal] = useState(0); // Dynamically calculates invoice total
   // const [timeNow, setTimeNow] = useState("")
-  const editVendas = useSelector(state => state.venda || []);
-  const produtosData = useSelector(state => state.produtos['produtos'][0] || []);
-  const clientesData = useSelector(state => state.clientes['clientes'][0] || []);
-  const vendedoresData = useSelector(state => state.vendedores['vendedores'][0] || []);
-  const produtoSearchList = useSelector(state => state.produtoFormatado['produtoFormatado'][0] || [])
- 
-
-  
+  const editVendas = useSelector((state) => state.venda || []);
+  const produtosData = useSelector(
+    (state) => state.produtos["produtos"][0] || []
+  );
+  const clientesData = useSelector(
+    (state) => state.clientes["clientes"][0] || []
+  );
+  const vendedoresData = useSelector(
+    (state) => state.vendedores["vendedores"][0] || []
+  );
+  const produtoSearchList = useSelector(
+    (state) => state.produtoFormatado["produtoFormatado"][0] || []
+  );
 
   useEffect(() => {
-    
-    checkVendasParaEditar()
-    
-  }, [editVendas,vendedoresData,clientesData,produtoSearchList,produtosData])
-
+    checkVendasParaEditar();
+  }, [
+    editVendas,
+    vendedoresData,
+    clientesData,
+    produtoSearchList,
+    produtosData,
+  ]);
 
   useEffect(() => {
     setCurrentDateTime(getFullDateTime());
@@ -59,55 +64,51 @@ function EditVendas() {
     setTotal(newTotal);
   }, [editProduto]);
 
- 
+  //   // ***************Functions*******************
 
-//   // ***************Functions*******************
+  const checkVendasParaEditar = () => {
+    const vendaArray = Object.values(editVendas);
+    const updatedSelectedProdutos = [];
+    const clienteInfoArray = [];
 
-const checkVendasParaEditar = () => {
-  const vendaArray = Object.values(editVendas);
-  const updatedSelectedProdutos = [];
-  const clienteInfoArray = [];
+    vendaArray.forEach((venda) => {
+      const clienteInfo = {
+        vendedorId: venda.vendedor_id,
+        nomeVendedor: venda.vendedor,
+        clienteId: venda.cliente_id,
+        nomeCliente: venda.cliente,
+        vendaId: venda.id,
+        notaFiscal: venda.nota_fiscal,
+        datetime: venda.datetime,
+      };
 
-  vendaArray.forEach((venda) => {
-    const clienteInfo = {
-      vendedorId: venda.vendedor_id,
-      nomeVendedor: venda.vendedor,
-      clienteId: venda.cliente_id,
-      nomeCliente: venda.cliente,
-      vendaId: venda.id,
-      notaFiscal: venda.nota_fiscal,
-      datetime: venda.datetime
-    };
+      clienteInfoArray.push(clienteInfo);
 
-    clienteInfoArray.push(clienteInfo);
-    
-    const produtos = venda.produtos;
+      const produtos = venda.produtos;
 
-    if (produtos && produtos.length > 0) {
-      produtos.forEach((code) => {
-        
-        // Create a new object for each product
-        const produtoEdit = {
-          id: code.id,
-          produto_id: code.produto_id,
-          codigo: code.codigo,
-          descricao: code.descricao,
-          percentual_comissao: code.percentual_comissao,
-          preco: code.valor_unitario,
-          quantidade: code.quantidade,
-          total: code.quantidade * code.valor_unitario,
-          comissao_configurada : code.comissao_configurada,
-          comissao_a_receber : code.comissao_a_receber
-        };
-        updatedSelectedProdutos.push(produtoEdit);
-      });
-    }
-  });
+      if (produtos && produtos.length > 0) {
+        produtos.forEach((code) => {
+          // Create a new object for each product
+          const produtoEdit = {
+            id: code.id,
+            produto_id: code.produto_id,
+            codigo: code.codigo,
+            descricao: code.descricao,
+            percentual_comissao: code.percentual_comissao,
+            preco: code.valor_unitario,
+            quantidade: code.quantidade,
+            total: code.quantidade * code.valor_unitario,
+            comissao_configurada: code.comissao_configurada,
+            comissao_a_receber: code.comissao_a_receber,
+          };
+          updatedSelectedProdutos.push(produtoEdit);
+        });
+      }
+    });
 
-  setEditProduto(updatedSelectedProdutos);
-  setEditPessoa(clienteInfoArray[0]);
-
-};
+    setEditProduto(updatedSelectedProdutos);
+    setEditPessoa(clienteInfoArray[0]);
+  };
 
   const handleInputChange = (field, value) => {
     setAddproduto((prevValues) => ({
@@ -146,54 +147,56 @@ const checkVendasParaEditar = () => {
   };
 
   // Function to check whether the all invoice fields are filled before clicking on Finalizar
-  const areInvoiceFieldsFilled = () =>{
-    return editProduto.length > 0 && editPessoa.clienteId && editPessoa.vendedorId;
-
-  }
+  const areInvoiceFieldsFilled = () => {
+    return (
+      editProduto.length > 0 && editPessoa.clienteId && editPessoa.vendedorId
+    );
+  };
 
   //Deletar venda sendo cadastrada
-  const handleEditDelete = (id) =>{
-    const removedItem = editProduto.filter((item) => item.id !== id )
-    setEditProduto(removedItem)
-    axios.delete(`http://127.0.0.1:8000/produtosvendidos/${id}/`)
-    .then()
-    .catch(error => console.log(error))
-    
-  }
+  const handleEditDelete = (id) => {
+    const removedItem = editProduto.filter((item) => item.id !== id);
+    setEditProduto(removedItem);
+    axios
+      .delete(`http://127.0.0.1:8000/produtosvendidos/${id}/`)
+      .then()
+      .catch((error) => console.log(error));
+  };
   // Finalizar Compras
-  const handleSubmit= (e) =>{
+  const handleSubmit = (e) => {
     e.preventDefault();
-    
-    const invoice = {}
+
+    const invoice = {};
     invoice.id = editPessoa.vendaId;
-    invoice.nota_fiscal = editPessoa.notaFiscal
+    invoice.nota_fiscal = editPessoa.notaFiscal;
     invoice.cliente = editPessoa.clienteId;
     invoice.vendedor = editPessoa.vendedorId;
-    invoice.datetime = editPessoa.datetime
+    invoice.datetime = editPessoa.datetime;
 
-
-    axios.patch(`http://127.0.0.1:8000/vendas/${invoice.id}/`, invoice,{
-      headers: {
-        'Content-Type': 'application/json',
-    }
-    })
-    .then(response => {
-      dispatch({ type: 'UPDATE_VENDA_DATA', payload: [] });
-      navigate('/', { state: { editResult: { success: true } } });
-      
-    })
-    .catch(error =>{
-      console.log(error + 'Produto não salvo')
-    })
-    
-  }
-
+    axios
+      .patch(`http://127.0.0.1:8000/vendas/${invoice.id}/`, invoice, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        dispatch({ type: "UPDATE_VENDA_DATA", payload: [] });
+        navigate("/", { state: { editResult: { success: true } } });
+      })
+      .catch((error) => {
+        console.log(error + "Produto não salvo");
+      });
+  };
 
   return (
     <div className="container-fluid mt-5 min-vh-100">
       <div className="row mb-5">
-        <div className="col-8"><h3>Produtos</h3></div>
-        <div className="col-4"><h3>Dados da Venda</h3></div>
+        <div className="col-8">
+          <h3>Produtos</h3>
+        </div>
+        <div className="col-4">
+          <h3>Dados da Venda</h3>
+        </div>
       </div>
 
       <div className="row">
@@ -266,7 +269,15 @@ const checkVendasParaEditar = () => {
                         <td>{item.quantidade}</td>
                         <td> R${item.preco}</td>
                         <td> R${item.total}</td>
-                        <td> <i className="action-delete" onClick={ () => handleEditDelete(item.id)}><FaIcons.FaTrash /> </i> </td>
+                        <td>
+                          {" "}
+                          <i
+                            className="action-delete"
+                            onClick={() => handleEditDelete(item.id)}
+                          >
+                            <FaIcons.FaTrash />{" "}
+                          </i>{" "}
+                        </td>
                       </tr>
                     </React.Fragment>
                   ))}
@@ -289,11 +300,12 @@ const checkVendasParaEditar = () => {
               </div>
               <div className="form-group mb-4">
                 <label htmlFor="vendedor">Escolha um vendedor</label>
-                <select className="form-control form-select" 
-                id="vendedor"
-                value={editPessoa.vendedorId}
-                onChange={(e) => handlePessoa('vendedorId', e.target.value)}
-                // defaultValue="vendedor"
+                <select
+                  className="form-control form-select"
+                  id="vendedor"
+                  value={editPessoa.vendedorId}
+                  onChange={(e) => handlePessoa("vendedorId", e.target.value)}
+                  // defaultValue="vendedor"
                 >
                   <option selected disabled value="">
                     {editPessoa.nomeVendedor}
@@ -307,11 +319,12 @@ const checkVendasParaEditar = () => {
               </div>
               <div className="form-group mb-5">
                 <label htmlFor="cliente">Escolha um cliente</label>
-                <select className="form-control form-select" 
-                id="cliente"
-                value={editPessoa.clienteId}
-                onChange={(e) => handlePessoa('clienteId', e.target.value)}
-                // defaultValue="cliente"
+                <select
+                  className="form-control form-select"
+                  id="cliente"
+                  value={editPessoa.clienteId}
+                  onChange={(e) => handlePessoa("clienteId", e.target.value)}
+                  // defaultValue="cliente"
                 >
                   <option selected disabled value="">
                     {editPessoa.nomeCliente}
@@ -334,11 +347,13 @@ const checkVendasParaEditar = () => {
                   <button className="btn btn-secondary">Cancelar</button>
                 </div>
                 <div className="col text-end">
-                  <button className="btn btn-secondary"
-                  onClick={handleSubmit}
-                  disabled={!areInvoiceFieldsFilled()}
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleSubmit}
+                    disabled={!areInvoiceFieldsFilled()}
                   >
-                    Finalizar</button>
+                    Finalizar
+                  </button>
                 </div>
               </div>
             </form>
