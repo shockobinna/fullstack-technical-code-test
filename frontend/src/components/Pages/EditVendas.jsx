@@ -189,7 +189,7 @@ function EditVendas() {
   };
 
   return (
-    <div className="container-fluid mt-5 min-vh-100">
+    <div className="container mt-5 min-vh-100">
       <div className="row mb-5">
         <div className="col-8">
           <h3>Produtos</h3>
@@ -204,7 +204,7 @@ function EditVendas() {
           <div className="">
             <form>
               <div className="row mb-5">
-                <div className="col-6">
+                <div className="col-7">
                   <label>Buscar pelo código de barra ou descrição</label>
                   <Select
                     options={produtoSearchList}
@@ -220,7 +220,7 @@ function EditVendas() {
                     isDisabled
                   />
                 </div>
-                <div className="col-2">
+                <div className="col-3">
                   <label htmlFor="quantidade">Quantidade de Itens</label>
                   <input
                     type="number"

@@ -1,0 +1,91 @@
+.action_ver {
+  margin-right: 15px;
+  cursor: pointer;
+  color: var(--xpto-brand-primary, #00585e);
+  text-align: right;
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 133.188%; /* 21.31px */
+}
+.action_edit {
+  margin-right: 15px;
+  color: #00585e;
+  cursor: pointer;
+  flex-shrink: 0;
+  fill: rgba(0, 0, 0, 0);
+}
+.action_delete {
+  color: #be0000;
+  cursor: pointer;
+  fill: rgba(0, 0, 0, 0);
+}
+
+.vendas_titulo {
+  color: var(--xpto-brand-primary, #00585e);
+  font-family: Roboto;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 133.188%; /* 31.965px */
+}
+
+.btn_nova_venda {
+  padding: 11px 23px;
+  color: white;
+  border-radius: 3px;
+  background: var(--xpto-brand-primary, #00585e);
+  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+.expandadbleTableHead {
+  color: #000;
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 133.188%; /* 21.31px */
+}
+.expandadbleTableDetails {
+  color: #000;
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 133.188%; /* 21.31px */
+}
+.mainTableHeader {
+  color: #000;
+  font-family: Roboto;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 133.188%; /* 23.974px */
+}
+.footerInfo {
+  color: var(--xpto-brand-primary-dark, #003538);
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 133.188%; /* 21.31px */
+}
+
+.venda_table {
+  color: #000;
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 133.188%; /* 21.31px */
+}
+
+.VendaTableContainer {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.stickyVendaHeader thead th {
+  position: sticky;
+  top: 0;
+}

@@ -4,7 +4,6 @@ import "./Navbar.css";
 import * as FaIcons from "react-icons/fa";
 import { SidebarData } from "./SidebarData";
 
-
 function Navbar() {
   const [sidebar, setSidebar] = useState(false);
   const location = useLocation();
@@ -12,10 +11,8 @@ function Navbar() {
 
   const showSidebar = () => {
     setSidebar(!sidebar);
-    
   };
 
-  
   // Function to get the title based on the current route
   const getTitle = () => {
     switch (location.pathname) {
@@ -24,10 +21,10 @@ function Navbar() {
       case "/comissao":
         return "Comissão";
       case "/editarVenda":
-        return `Alterar Venda - ${editData || ''}`;
+        return `Alterar Venda - ${editData || ""}`;
       case "/novaVenda":
         return "Nova Venda";
-      
+
       default:
         return "Vendas";
     }
@@ -36,7 +33,7 @@ function Navbar() {
   useEffect(() => {
     document.title = getTitle();
   }, [location]);
-  
+
   return (
     <>
       <div className="navbar">
@@ -50,24 +47,18 @@ function Navbar() {
         className={sidebar ? "sidebar-container active" : "sidebar-container"}
       >
         <ul className="sidebar-items">
-          <li className="sidebar-toggle">
-            <Link to="#" className="nav-menu-icon" onClick={showSidebar}>
-              <FaIcons.FaWindowClose />
-            </Link>
-            
-          </li>
           {SidebarData.map((sidebaritem) => {
             return (
               <li
                 key={sidebaritem.id}
                 className={sidebaritem.cName}
-                onClick={showSidebar }
+                onClick={showSidebar}
               >
                 <Link to={sidebaritem.path}>
                   {sidebaritem.icon}
                   <span className="side">{sidebaritem.title}</span>
                 </Link>
-                < FaIcons.FaGreaterThan className="greaterSign"/>
+                <FaIcons.FaGreaterThan className="greaterSign" />
               </li>
             );
           })}

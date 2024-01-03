@@ -4,10 +4,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import "../DisplayVendas.css";
+import styles from "../DisplayVendas.module.css";
 import * as FaIcons from "react-icons/fa";
 import DeleteVendaModal from "./DeleteVendaModal";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 const DisplayVendas = () => {
   const navigate = useNavigate();
@@ -247,137 +247,135 @@ const DisplayVendas = () => {
   };
 
   return (
-    <div className="container-fluid mt-5">
+    <div className="container mt-5">
       <div className="d-flex justify-content-between mb-5">
         <div>
           {" "}
-          <h3 className="vendas_titulo">Vendas Realizadas</h3>
+          <h3 className={styles.vendas_titulo}>Vendas Realizadas</h3>
         </div>
         <div>
           <Link to="/novaVenda">
-            <button className="btn btn-primary novavenda_link">
+            <button className={styles.btn_nova_venda}>
               Inserir Nova Venda
             </button>
           </Link>
         </div>
       </div>
-      <table className="table table-light">
-        <thead>
-          <tr>
-            <th>Nota Fiscal</th>
-            <th>Cliente</th>
-            <th>Vendedor</th>
-            <th>Data da Venda</th>
-            <th>Valor Total</th>
-            <th style={{ paddingLeft: "40px" }}>Opcões</th>
-          </tr>
-        </thead>
-        <tbody>
-          {salesData.map((item) => (
-            <React.Fragment key={item.id}>
-              <tr>
-                <td>{item.nota_fiscal}</td>
-                <td>{item.cliente}</td>
-                <td>{item.vendedor}</td>
-                <td>{formatarData(item.datetime)}</td>
-                <td style={{ paddingLeft: "50px" }}>{item.total_compras}</td>
-                <td>
-                  <tr>
-                    <td>
-                      {" "}
-                      <i
-                        className="action-ver"
-                        onClick={() => toggleRow(item.id)}
-                      >
-                        {item.isExpanded ? "Fechar" : "Ver Itens"}
-                      </i>
-                    </td>
-                    <td>
-                      {" "}
-                      <i
-                        className="action-edit"
-                        onClick={() => handleUpdate(item)}
-                      >
-                        <FaIcons.FaEdit />
-                      </i>
-                    </td>
-                    <td>
-                      {" "}
-                      <i
-                        className="action-delete"
-                        onClick={() => handleDeleteClick(item.id)}
-                      >
-                        <FaIcons.FaTrash />{" "}
-                      </i>{" "}
-                    </td>
-                  </tr>
-                </td>
-              </tr>
-              {item.isExpanded && (
-                <td colspan="6">
-                  <table className="table table-borderless">
-                    <thead>
-                      <tr>
-                        <th>Produtos/Serviço</th>
-                        <th>Quantidade</th>
-                        <th>Preço unitario</th>
-                        <th>Total do Produto</th>
-                        <th>% de Comissão</th>
-                        <th>Comissão</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {item.produtos.map((produto) => (
-                        <tr key={produto.id}>
-                          <td>{produto.descricao}</td>
-                          <td style={{ paddingLeft: "50px" }}>
-                            {produto.quantidade}
-                          </td>
-                          <td style={{ paddingLeft: "50px" }}>
-                            R${produto.valor_unitario}
-                          </td>
-                          <td style={{ paddingLeft: "50px" }}>
-                            R${produto.valor_unitario * produto.quantidade}
-                          </td>
-                          <td style={{ paddingLeft: "50px" }}>
-                            {produto.comissao_configurada}%
-                          </td>
-                          <td style={{ paddingLeft: "30px" }}>
-                            R${produto.comissao_a_receber}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <table className="table table-borderless">
-                    <thead>
-                      <tr>
-                        <th className="produto_servico">Total de Venda</th>
-                        <th style={{ paddingLeft: "50px" }}>
-                          {totalsForRow.totalQuantidade}
-                        </th>
-                        <th>&nbsp;</th>
-                        <th style={{ paddingRight: "23px" }}>
-                          R$ {totalsForRow.totalRowProduto}
-                        </th>
-                        <th></th>
-                        <th
-                          style={{ paddingLeft: "30px" }}
-                          className="produto_comissao"
+      <div className={styles.VendaTableContainer}>
+        <table className={`table table-light ${styles.stickyVendaHeader}`}>
+          <thead>
+            <tr className={styles.mainTableHead}>
+              <th>Nota Fiscal</th>
+              <th>Cliente</th>
+              <th>Vendedor</th>
+              <th>Data da Venda</th>
+              <th>Valor Total</th>
+              <th style={{ paddingLeft: "40px" }}>Opcões</th>
+            </tr>
+          </thead>
+          <tbody>
+            {salesData.map((item) => (
+              <React.Fragment key={item.id}>
+                <tr className={styles.venda_table}>
+                  <td>{item.nota_fiscal}</td>
+                  <td>{item.cliente}</td>
+                  <td>{item.vendedor}</td>
+                  <td>{formatarData(item.datetime)}</td>
+                  <td style={{ paddingLeft: "50px" }}>{item.total_compras}</td>
+                  <td>
+                    <tr>
+                      <td>
+                        {" "}
+                        <i
+                          className={styles.action_ver}
+                          onClick={() => toggleRow(item.id)}
                         >
-                          R$ {totalsForRow.totalComissao}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </td>
-              )}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </table>
-
+                          {item.isExpanded ? "Fechar" : "Ver Itens"}
+                        </i>
+                      </td>
+                      <td>
+                        {" "}
+                        <i
+                          className={styles.action_edit}
+                          onClick={() => handleUpdate(item)}
+                        >
+                          <FaIcons.FaEdit />
+                        </i>
+                      </td>
+                      <td>
+                        {" "}
+                        <i
+                          className={styles.action_delete}
+                          onClick={() => handleDeleteClick(item.id)}
+                        >
+                          <FaIcons.FaTrash />{" "}
+                        </i>{" "}
+                      </td>
+                    </tr>
+                  </td>
+                </tr>
+                {item.isExpanded && (
+                  <td colspan="6">
+                    <table className="table table-borderless">
+                      <thead>
+                        <tr className={styles.expandadbleTableHead}>
+                          <th>Produtos/Serviço</th>
+                          <th>Quantidade</th>
+                          <th>Preço unitario</th>
+                          <th>Total do Produto</th>
+                          <th>% de Comissão</th>
+                          <th>Comissão</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {item.produtos.map((produto) => (
+                          <tr
+                            className={styles.expandadbleTableDetails}
+                            key={produto.id}
+                          >
+                            <td>{produto.descricao}</td>
+                            <td style={{ paddingLeft: "50px" }}>
+                              {produto.quantidade}
+                            </td>
+                            <td style={{ paddingLeft: "50px" }}>
+                              R${produto.valor_unitario}
+                            </td>
+                            <td style={{ paddingLeft: "50px" }}>
+                              R${produto.valor_unitario * produto.quantidade}
+                            </td>
+                            <td style={{ paddingLeft: "50px" }}>
+                              {produto.comissao_configurada}%
+                            </td>
+                            <td style={{ paddingLeft: "30px" }}>
+                              R${produto.comissao_a_receber}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className={styles.footerInfo}>
+                          <th className="produto_servico">Total de Venda</th>
+                          <th style={{ paddingLeft: "50px" }}>
+                            {totalsForRow.totalQuantidade}
+                          </th>
+                          <th>&nbsp;</th>
+                          <th style={{ paddingLeft: "50px" }}>
+                            R$ {totalsForRow.totalRowProduto}
+                          </th>
+                          <th></th>
+                          <th style={{ paddingLeft: "30px" }}>
+                            R$ {totalsForRow.totalComissao}
+                          </th>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </td>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <DeleteVendaModal
         isOpen={isDeleteModalOpen}
         onClose={handleModalClose}
