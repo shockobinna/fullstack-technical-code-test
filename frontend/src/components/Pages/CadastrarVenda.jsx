@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import "../CadastrarVenda.css";
+import styles from "../Styles/CadastrarVenda.module.css";
 import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
@@ -216,7 +216,7 @@ function CadastrarVenda() {
                       <label htmlFor="quantidade">Quantidade de Itens</label>
                       <input
                         type="number"
-                        className="form-control quant"
+                        className={`form-control ${styles.quant}`}
                         value={selectedProdutos.quantidade}
                         onChange={(e) =>
                           handleInputChange(
@@ -242,7 +242,9 @@ function CadastrarVenda() {
 
               <div className="row">
                 <div className="col table-responsive">
-                  <table className="table table-borderless produto_table table-light">
+                  <table
+                    className={`table table-borderless ${styles.produto_table} table-light`}
+                  >
                     <thead>
                       <tr>
                         <th scope="col">Produtos/Serviços</th>
@@ -279,7 +281,7 @@ function CadastrarVenda() {
                 </div>
               </div>
             </div>
-            <div className="col-3 dados">
+            <div className={`col-3 ${styles.dados}`}>
               <div className="">
                 <form>
                   <div className="form-group mb-4">

@@ -1,0 +1,14 @@
+.quant {
+  width: 170px;
+}
+
+.produto_table {
+  width: 50%;
+}
+.dados {
+  border-left: 3px solid #bebeba;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+}

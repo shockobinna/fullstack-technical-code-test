@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import styles from "../DisplayVendas.module.css";
+import styles from "../Styles/DisplayVendas.module.css";
 import * as FaIcons from "react-icons/fa";
 import DeleteVendaModal from "./DeleteVendaModal";
 import { useDispatch } from "react-redux";
@@ -247,7 +247,7 @@ const DisplayVendas = () => {
   };
 
   return (
-    <div className="container mt-5">
+    <div className="container my-4">
       <div className="d-flex justify-content-between mb-5">
         <div>
           {" "}

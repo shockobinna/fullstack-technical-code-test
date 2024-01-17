@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import "../CadastrarVenda.css";
+import styles from "../Styles/CadastrarVenda.module.css";
 import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
@@ -224,7 +224,7 @@ function EditVendas() {
                   <label htmlFor="quantidade">Quantidade de Itens</label>
                   <input
                     type="number"
-                    className="form-control quant"
+                    className={`form-control ${styles.quant}`}
                     value={addProduto.quantidade}
                     // // placeholder="0"
                     onChange={(e) =>
@@ -286,7 +286,7 @@ function EditVendas() {
             </div>
           </div>
         </div>
-        <div className="col-3 dados">
+        <div className={`col-3 ${styles.dados}`}>
           <div className="">
             <form>
               <div className="form-group mb-4">

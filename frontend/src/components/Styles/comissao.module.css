@@ -1,0 +1,30 @@
+.startDate,
+.endDate {
+  margin-right: 20px;
+  width: 200px;
+}
+.searchbtn {
+  display: flex;
+  width: 42px;
+  height: 38px;
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid var(--xpto-brand-primary, #00585e);
+  background: var(--xpto-brand-primary, #00585e);
+  color: white;
+  justify-content: center;
+  align-items: center;
+}
+.msg {
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* table td:nth-child(3),table td:nth-child(4) {
+    padding-left: 50px;
+  } */
+
+table tfoot td {
+  border-bottom: none;
+}
