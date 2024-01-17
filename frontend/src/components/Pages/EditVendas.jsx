@@ -226,18 +226,16 @@ function EditVendas() {
                     type="number"
                     className={`form-control ${styles.quant}`}
                     value={addProduto.quantidade}
-                    // // placeholder="0"
                     onChange={(e) =>
                       handleInputChange("quantidade", e.target.value)
                     }
                     disabled
                   />
                 </div>
-                <div className="col-2 mt-4 text-center">
+                <div className="col-2 mt-4">
                   <button
                     type="button"
-                    className="btn btn-secondary ml-3"
-                    // onClick={handleEditAddicionar}
+                    className={styles.add_btn}
                     disabled={!areFieldsFilled()}
                   >
                     Adicionar
@@ -249,7 +247,9 @@ function EditVendas() {
 
           <div className="row">
             <div className="col table-responsive">
-              <table className="table table-borderless produto_table table-light">
+              <table
+                className={`table table-borderless ${styles.produto_table} table-light`}
+              >
                 <thead>
                   <tr>
                     <th scope="col">Produtos/Serviços</th>
@@ -272,7 +272,7 @@ function EditVendas() {
                         <td>
                           {" "}
                           <i
-                            className="action-delete"
+                            className={styles.action_delete}
                             onClick={() => handleEditDelete(item.id)}
                           >
                             <FaIcons.FaTrash />{" "}
@@ -286,7 +286,7 @@ function EditVendas() {
             </div>
           </div>
         </div>
-        <div className={`col-3 ${styles.dados}`}>
+        <div className={`col-4 ${styles.dados}`}>
           <div className="">
             <form>
               <div className="form-group mb-4">
@@ -338,17 +338,17 @@ function EditVendas() {
               </div>
 
               <div className="row mb-5">
-                <div className="col">Valor total da venda:</div>
-                <div className="col text-end">R$ {total}</div>
+                <div className="col fw-bold mt-2">Valor total da venda:</div>
+                <div className="col text-end fw-bold fs-4">R$ {total}</div>
               </div>
 
               <div className="row">
                 <div className="col">
-                  <button className="btn btn-secondary">Cancelar</button>
+                  <button className={styles.add_btn}>Cancelar</button>
                 </div>
                 <div className="col text-end">
                   <button
-                    className="btn btn-secondary"
+                    className={styles.finalizar_btn}
                     onClick={handleSubmit}
                     disabled={!areInvoiceFieldsFilled()}
                   >

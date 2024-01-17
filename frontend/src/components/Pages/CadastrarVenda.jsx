@@ -226,10 +226,10 @@ function CadastrarVenda() {
                         }
                       />
                     </div>
-                    <div className="col-2 mt-4 text-center">
+                    <div className="col-2 mt-4">
                       <button
                         type="button"
-                        className="btn btn-secondary ml-3"
+                        className={styles.add_btn}
                         onClick={handleAddicionar}
                         disabled={!areFieldsFilled()}
                       >
@@ -267,7 +267,7 @@ function CadastrarVenda() {
                             <td>
                               {" "}
                               <i
-                                className="action-delete"
+                                className={styles.action_delete}
                                 onClick={() => handleDelete(item.id)}
                               >
                                 <FaIcons.FaTrash />{" "}
@@ -281,7 +281,7 @@ function CadastrarVenda() {
                 </div>
               </div>
             </div>
-            <div className={`col-3 ${styles.dados}`}>
+            <div className={`col-4 ${styles.dados}`}>
               <div className="">
                 <form>
                   <div className="form-group mb-4">
@@ -337,17 +337,19 @@ function CadastrarVenda() {
                   </div>
 
                   <div className="row mb-5">
-                    <div className="col">Valor total da venda:</div>
-                    <div className="col text-end">R$ {total}</div>
+                    <div className="col fw-bold mt-2">
+                      Valor total da venda:
+                    </div>
+                    <div className="col text-end fw-bold fs-4">R$ {total}</div>
                   </div>
 
                   <div className="row">
                     <div className="col">
-                      <button className="btn btn-secondary">Cancelar</button>
+                      <button className={styles.add_btn}>Cancelar</button>
                     </div>
                     <div className="col text-end">
                       <button
-                        className="btn btn-secondary"
+                        className={styles.finalizar_btn}
                         onClick={handleSubmit}
                         disabled={!areInvoiceFieldsFilled()}
                       >
