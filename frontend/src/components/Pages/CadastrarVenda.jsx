@@ -1,23 +1,31 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../Styles/CadastrarVenda.module.css";
 import axios from "axios";
 import Select from "react-select";
 import * as FaIcons from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchProdutos,
+  fetchClientes,
+  fetchVendedores,
+} from "../../redux/actions";
 
-function CadastrarVenda() {
+const CadastrarVenda = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // from redux store [produtos, clientes,vendedores, produtoSearchList]
-  const produtos = useSelector((state) => state.produtos["produtos"][0] || []);
-  const clientes = useSelector((state) => state.clientes["clientes"][0] || []);
-  const vendedores = useSelector(
-    (state) => state.vendedores["vendedores"][0] || []
+  const produtosData = useSelector((state) => state.venda.produtos[0]);
+  const clientesData = useSelector((state) => state.venda.clientes[0]);
+  const vendedoresData = useSelector((state) => state.venda.vendedores[0]);
+  const produtoSearchListData = useSelector(
+    (state) => state.venda.produtoFormatado[0]
   );
-  const produtoSearchList = useSelector(
-    (state) => state.produtoFormatado["produtoFormatado"][0] || []
-  );
+  const isLoading = useSelector((state) => state.venda.loading);
+  const [produtos, setProdutos] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [vendedores, setVendedores] = useState([]);
+  const [produtoSearchList, setProdutoSearchList] = useState([]);
 
   const [displayprodutoSelected, setDisplayProdutoSelected] = useState([]); // Display produto in the table
   const [selectedProdutos, setSelectedProdutos] = useState({
@@ -32,8 +40,28 @@ function CadastrarVenda() {
   const [total, setTotal] = useState(0); // Dynamically calculates invoice total
 
   useEffect(() => {
-    setCurrentDateTime(getFullDateTime());
+    dispatch(fetchProdutos());
+    dispatch(fetchClientes());
+    dispatch(fetchVendedores());
+  }, [dispatch]);
 
+  useEffect(() => {
+    if (produtosData) {
+      setProdutos(produtosData);
+    }
+    if (clientesData) {
+      setClientes(clientesData);
+    }
+    if (vendedoresData) {
+      setVendedores(vendedoresData);
+    }
+    if (produtoSearchListData) {
+      setProdutoSearchList(produtoSearchListData);
+    }
+  }, [produtosData, clientesData, vendedoresData, produtoSearchListData]);
+
+  useEffect(() => {
+    setCurrentDateTime(getFullDateTime());
     // Update every second
     const intervalId = setInterval(() => {
       setCurrentDateTime(getFullDateTime());
@@ -53,17 +81,6 @@ function CadastrarVenda() {
   }, [displayprodutoSelected]);
 
   // ***************Functions*******************
-
-  const filterOptions = ({ label, value, codigo }, inputValue) => {
-    const searchValue = inputValue.toLowerCase();
-
-    // Check if the label, value, or code includes the search value
-    return (
-      label.toLowerCase().includes(searchValue) ||
-      (value && value.toString().includes(searchValue)) ||
-      (codigo && codigo.toString().includes(searchValue))
-    );
-  };
 
   const handleInputChange = (field, value) => {
     setSelectedProdutos((prevValues) => ({
@@ -179,7 +196,9 @@ function CadastrarVenda() {
 
   return (
     <div>
-      {
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
         <div className="container mt-5 min-vh-100">
           <div className="row mb-5">
             <div className="col-8">
@@ -203,7 +222,7 @@ function CadastrarVenda() {
                         onChange={(value) =>
                           handleInputChange("produto_id", value)
                         }
-                        filterOption={filterOptions}
+                        // filterOption={filterOptions}
                         isSearchable
                         placeholder="Digite o código ou o nome do produto"
                         styles={{
@@ -302,7 +321,6 @@ function CadastrarVenda() {
                       onChange={(e) =>
                         handleFinalizeChange("vendedor_id", e.target.value)
                       }
-                      // defaultValue=""
                     >
                       <option selected disabled value="">
                         Selecione o nome
@@ -323,7 +341,6 @@ function CadastrarVenda() {
                       onChange={(e) =>
                         handleFinalizeChange("cliente_id", e.target.value)
                       }
-                      // defaultValue=""
                     >
                       <option selected disabled value="">
                         Selecione o nome
@@ -362,9 +379,10 @@ function CadastrarVenda() {
             </div>
           </div>
         </div>
-      }
+      )}
+      ;
     </div>
   );
-}
+};
 
 export default CadastrarVenda;

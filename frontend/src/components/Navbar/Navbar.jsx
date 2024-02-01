@@ -9,7 +9,6 @@ function Navbar() {
   const [sidebar, setSidebar] = useState(false);
   const location = useLocation();
   const editData = location.state?.editData;
-  console.log(SidebarData);
 
   const showSidebar = () => {
     setSidebar(!sidebar);

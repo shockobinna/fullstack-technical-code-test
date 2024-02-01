@@ -7,13 +7,15 @@ import { Link, useNavigate } from "react-router-dom";
 import styles from "../Styles/DisplayVendas.module.css";
 import * as FaIcons from "react-icons/fa";
 import DeleteVendaModal from "./DeleteVendaModal";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllVendas } from "../../redux/actions";
 
 const DisplayVendas = () => {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
 
+  const allVendas = useSelector((state) => state.venda.allVendas[0]);
+  const isLoading = useSelector((state) => state.venda.loading);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [salesData, setSalesData] = useState([]);
@@ -25,23 +27,26 @@ const DisplayVendas = () => {
     totalRowProduto: 0,
     totalComissao: 0,
   });
+  const location = useLocation();
+  console.log(allVendas);
 
   useEffect(() => {
     if (initialRender) {
-      fetchVendas(); //buscar todas vendas sempre quando o component é renderizado
-      fetchProdutos();
-      fetchClientes();
-      fetchVendedores();
+      dispatch(fetchAllVendas());
       setInitialRender(false);
     }
 
     if (produtoDeletado) {
-      fetchVendas(); // atualizar a list de vendas após deletar alguma venda
+      dispatch(fetchAllVendas());
       setProdutoDeletado(false);
     }
-  }, [produtoDeletado, initialRender]); // dependencias para o fetchVendas fucionar dinamicamente
+  }, [produtoDeletado, initialRender, dispatch]); // dependencias para o fetchVendas fucionar dinamicamente
 
-  const location = useLocation();
+  useEffect(() => {
+    if (allVendas) {
+      setSalesData(allVendas);
+    }
+  }, [allVendas]);
 
   useEffect(() => {
     // Check the nested state property
@@ -96,51 +101,6 @@ const DisplayVendas = () => {
       };
     }
   }, [location.state, toastDisplayed, initialRender]);
-
-  const fetchVendas = async () => {
-    await axios
-      .get("http://127.0.0.1:8000/listallvendas/")
-      .then((response) => {
-        setSalesData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching sales data:", error);
-      });
-  };
-
-  const fetchProdutos = async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:8000/produtos/");
-
-      const formattedOptions = response.data.map((produto) => ({
-        value: produto.id,
-        label: `${produto.codigo} - ${produto.descricao}`,
-        codigo: produto.codigo, // Add the product code to the option for filtering
-      }));
-      dispatch({ type: "ADD_PRODUTOS", payload: response.data });
-      dispatch({ type: "SEARCH_PRODUTO", payload: formattedOptions });
-    } catch (error) {
-      console.error("Error fetching data1:", error);
-    }
-  };
-
-  const fetchClientes = async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:8000/clientes/");
-      dispatch({ type: "ADD_CLIENTES", payload: response.data });
-    } catch (error) {
-      console.error("Error fetching data1:", error);
-    }
-  };
-
-  const fetchVendedores = async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:8000/vendedores/");
-      dispatch({ type: "ADD_VENDEDORES", payload: response.data });
-    } catch (error) {
-      console.error("Error fetching data1:", error);
-    }
-  };
 
   const toggleRow = (rowId) => {
     setSalesData((prevData) =>
@@ -274,105 +234,111 @@ const DisplayVendas = () => {
             </tr>
           </thead>
           <tbody>
-            {salesData.map((item) => (
-              <React.Fragment key={item.id}>
-                <tr className={styles.venda_table}>
-                  <td>{item.nota_fiscal}</td>
-                  <td>{item.cliente}</td>
-                  <td>{item.vendedor}</td>
-                  <td>{formatarData(item.datetime)}</td>
-                  <td style={{ paddingLeft: "50px" }}>{item.total_compras}</td>
-                  <td>
-                    <tr>
-                      <td>
-                        {" "}
-                        <i
-                          className={styles.action_ver}
-                          onClick={() => toggleRow(item.id)}
-                        >
-                          {item.isExpanded ? "Fechar" : "Ver Itens"}
-                        </i>
-                      </td>
-                      <td>
-                        {" "}
-                        <i
-                          className={styles.action_edit}
-                          onClick={() => handleUpdate(item)}
-                        >
-                          <FaIcons.FaEdit />
-                        </i>
-                      </td>
-                      <td>
-                        {" "}
-                        <i
-                          className={styles.action_delete}
-                          onClick={() => handleDeleteClick(item.id)}
-                        >
-                          <FaIcons.FaTrash />{" "}
-                        </i>{" "}
-                      </td>
-                    </tr>
-                  </td>
-                </tr>
-                {item.isExpanded && (
-                  <td colspan="6">
-                    <table className="table table-borderless">
-                      <thead>
-                        <tr className={styles.expandadbleTableHead}>
-                          <th>Produtos/Serviço</th>
-                          <th>Quantidade</th>
-                          <th>Preço unitario</th>
-                          <th>Total do Produto</th>
-                          <th>% de Comissão</th>
-                          <th>Comissão</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {item.produtos.map((produto) => (
-                          <tr
-                            className={styles.expandadbleTableDetails}
-                            key={produto.id}
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              salesData.map((item) => (
+                <React.Fragment key={item.id}>
+                  <tr className={styles.venda_table}>
+                    <td>{item.nota_fiscal}</td>
+                    <td>{item.cliente}</td>
+                    <td>{item.vendedor}</td>
+                    <td>{formatarData(item.datetime)}</td>
+                    <td style={{ paddingLeft: "50px" }}>
+                      {item.total_compras}
+                    </td>
+                    <td>
+                      <tr>
+                        <td>
+                          {" "}
+                          <i
+                            className={styles.action_ver}
+                            onClick={() => toggleRow(item.id)}
                           >
-                            <td>{produto.descricao}</td>
-                            <td style={{ paddingLeft: "50px" }}>
-                              {produto.quantidade}
-                            </td>
-                            <td style={{ paddingLeft: "50px" }}>
-                              R${produto.valor_unitario}
-                            </td>
-                            <td style={{ paddingLeft: "50px" }}>
-                              R${produto.valor_unitario * produto.quantidade}
-                            </td>
-                            <td style={{ paddingLeft: "50px" }}>
-                              {produto.comissao_configurada}%
-                            </td>
-                            <td style={{ paddingLeft: "30px" }}>
-                              R${produto.comissao_a_receber}
-                            </td>
+                            {item.isExpanded ? "Fechar" : "Ver Itens"}
+                          </i>
+                        </td>
+                        <td>
+                          {" "}
+                          <i
+                            className={styles.action_edit}
+                            onClick={() => handleUpdate(item)}
+                          >
+                            <FaIcons.FaEdit />
+                          </i>
+                        </td>
+                        <td>
+                          {" "}
+                          <i
+                            className={styles.action_delete}
+                            onClick={() => handleDeleteClick(item.id)}
+                          >
+                            <FaIcons.FaTrash />{" "}
+                          </i>{" "}
+                        </td>
+                      </tr>
+                    </td>
+                  </tr>
+                  {item.isExpanded && (
+                    <td colspan="6">
+                      <table className="table table-borderless">
+                        <thead>
+                          <tr className={styles.expandadbleTableHead}>
+                            <th>Produtos/Serviço</th>
+                            <th>Quantidade</th>
+                            <th>Preço unitario</th>
+                            <th>Total do Produto</th>
+                            <th>% de Comissão</th>
+                            <th>Comissão</th>
                           </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr className={styles.footerInfo}>
-                          <th className="produto_servico">Total de Venda</th>
-                          <th style={{ paddingLeft: "50px" }}>
-                            {totalsForRow.totalQuantidade}
-                          </th>
-                          <th>&nbsp;</th>
-                          <th style={{ paddingLeft: "50px" }}>
-                            R$ {totalsForRow.totalRowProduto}
-                          </th>
-                          <th></th>
-                          <th style={{ paddingLeft: "30px" }}>
-                            R$ {totalsForRow.totalComissao}
-                          </th>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </td>
-                )}
-              </React.Fragment>
-            ))}
+                        </thead>
+                        <tbody>
+                          {item.produtos.map((produto) => (
+                            <tr
+                              className={styles.expandadbleTableDetails}
+                              key={produto.id}
+                            >
+                              <td>{produto.descricao}</td>
+                              <td style={{ paddingLeft: "50px" }}>
+                                {produto.quantidade}
+                              </td>
+                              <td style={{ paddingLeft: "50px" }}>
+                                R${produto.valor_unitario}
+                              </td>
+                              <td style={{ paddingLeft: "50px" }}>
+                                R${produto.valor_unitario * produto.quantidade}
+                              </td>
+                              <td style={{ paddingLeft: "50px" }}>
+                                {produto.comissao_configurada}%
+                              </td>
+                              <td style={{ paddingLeft: "30px" }}>
+                                R${produto.comissao_a_receber}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr className={styles.footerInfo}>
+                            <th className="produto_servico">Total de Venda</th>
+                            <th style={{ paddingLeft: "50px" }}>
+                              {totalsForRow.totalQuantidade}
+                            </th>
+                            <th>&nbsp;</th>
+                            <th style={{ paddingLeft: "50px" }}>
+                              R$ {totalsForRow.totalRowProduto}
+                            </th>
+                            <th></th>
+                            <th style={{ paddingLeft: "30px" }}>
+                              R$ {totalsForRow.totalComissao}
+                            </th>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </td>
+                  )}
+                </React.Fragment>
+              ))
+            )}
           </tbody>
         </table>
       </div>
