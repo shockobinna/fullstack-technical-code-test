@@ -59,6 +59,20 @@ export const fetchVendedores = () => {
   };
 };
 
+export const deleteVenda = (id) => {
+  return async (dispatch) => {
+    try {
+      const response = await axios.delete(`http://127.0.0.1:8000/vendas/${id}`);
+      console.log(response.status);
+      if (response.status === 204) {
+        dispatch({ type: "DELETE_VENDA", payload: id });
+      }
+    } catch (error) {
+      console.log("Error fetching Produtos:", error);
+    }
+  };
+};
+
 export const updateVendaData = (updatedData) => ({
   type: "UPDATE_VENDA_DATA",
   payload: updatedData,

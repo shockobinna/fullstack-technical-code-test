@@ -6,6 +6,7 @@ const initialState = {
   vendedores: [],
   produtoFormatado: [],
   loading: false,
+  deleteVendaStatus: false,
 };
 
 const vendaReducer = (state = initialState, action) => {
@@ -20,14 +21,27 @@ const vendaReducer = (state = initialState, action) => {
       // Update state with fetched vendas from API
       return {
         ...state,
-        allVendas: [...state.allVendas, action.payload],
+        allVendas: [action.payload],
         loading: false,
+        deleteVendaStatus: false,
       };
     case "UPDATE_VENDA_DATA":
       // Update venda
       return {
         ...state,
         vendas: action.payload.length > 0 ? JSON.parse(action.payload) : [],
+        loading: false,
+        deleteVendaStatus: false,
+      };
+    case "DELETE_VENDA":
+      // Update venda
+      return {
+        ...state,
+        allVendas: [
+          ...state.allVendas,
+          state.allVendas.filter((venda) => venda.id !== action.payload),
+        ],
+        deleteVendaStatus: true,
         loading: false,
       };
     // Update state with fetched produtos
@@ -37,6 +51,7 @@ const vendaReducer = (state = initialState, action) => {
         ...state,
         produtos: [...state.produtos, action.payload],
         loading: false,
+        deleteVendaStatus: false,
       };
 
     case "ADD_CLIENTES":
@@ -45,6 +60,7 @@ const vendaReducer = (state = initialState, action) => {
         ...state,
         clientes: [...state.clientes, action.payload],
         loading: false,
+        deleteVendaStatus: false,
       };
 
     case "ADD_VENDEDORES":
@@ -53,6 +69,7 @@ const vendaReducer = (state = initialState, action) => {
         ...state,
         vendedores: [...state.vendedores, action.payload],
         loading: false,
+        deleteVendaStatus: false,
       };
 
     case "SEARCH_PRODUTO":
@@ -60,6 +77,7 @@ const vendaReducer = (state = initialState, action) => {
         ...state,
         produtoFormatado: [...state.produtoFormatado, action.payload],
         loading: false,
+        deleteVendaStatus: false,
       };
     default:
       return state;

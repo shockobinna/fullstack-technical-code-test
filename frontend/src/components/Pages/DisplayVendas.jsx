@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "../Styles/DisplayVendas.module.css";
 import * as FaIcons from "react-icons/fa";
 import DeleteVendaModal from "./DeleteVendaModal";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllVendas } from "../../redux/actions";
+import { fetchAllVendas, deleteVenda } from "../../redux/actions";
 
 const DisplayVendas = () => {
   const navigate = useNavigate();
@@ -16,11 +15,11 @@ const DisplayVendas = () => {
 
   const allVendas = useSelector((state) => state.venda.allVendas[0]);
   const isLoading = useSelector((state) => state.venda.loading);
+  const isVendaDeleted = useSelector((state) => state.venda.deleteVendaStatus);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [toastDisplayed, setToastDisplayed] = useState(false);
   const [salesData, setSalesData] = useState([]);
   const [produtoId, setProdutoId] = useState(null);
-  const [produtoDeletado, setProdutoDeletado] = useState(false);
   const [initialRender, setInitialRender] = useState(true); // logica para a função fetchVendas  funcionar quando o componente é renderizado
   const [totalsForRow, setTotalsForRow] = useState({
     totalQuantidade: 0,
@@ -28,25 +27,40 @@ const DisplayVendas = () => {
     totalComissao: 0,
   });
   const location = useLocation();
-  console.log(allVendas);
 
   useEffect(() => {
     if (initialRender) {
       dispatch(fetchAllVendas());
       setInitialRender(false);
     }
-
-    if (produtoDeletado) {
-      dispatch(fetchAllVendas());
-      setProdutoDeletado(false);
-    }
-  }, [produtoDeletado, initialRender, dispatch]); // dependencias para o fetchVendas fucionar dinamicamente
+  }, [initialRender, dispatch]); // dependencias para o fetchVendas fucionar dinamicamente
 
   useEffect(() => {
     if (allVendas) {
       setSalesData(allVendas);
     }
   }, [allVendas]);
+
+  useEffect(() => {
+    if (isVendaDeleted) {
+      toast.success("VENDA REMOVIDO COM SUCESSO!", {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: "#78D6C6",
+          width: "575px",
+          color: "white",
+        },
+      });
+      setInitialRender(true);
+    } else {
+      console.log("Falha em deletar o produto");
+    }
+  }, [isVendaDeleted]);
 
   useEffect(() => {
     // Check the nested state property
@@ -155,35 +169,10 @@ const DisplayVendas = () => {
     setProdutoId(id);
   };
 
-  const handleDeleteConfirm = async () => {
-    try {
-      const response = await axios.delete(
-        `http://127.0.0.1:8000/vendas/${produtoId}`
-      );
+  const handleDeleteConfirm = () => {
+    dispatch(deleteVenda(produtoId));
 
-      if (response.status === 204) {
-        setProdutoDeletado(true);
-        toast.success("VENDA REMOVIDO COM SUCESSO!", {
-          position: "top-right",
-          autoClose: 1000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          style: {
-            backgroundColor: "#78D6C6",
-            width: "575px",
-            color: "white",
-          },
-        });
-      } else {
-        console.log("Falha em deletar o produto");
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setDeleteModalOpen(false);
-    }
+    setDeleteModalOpen(false);
   };
 
   const handleModalClose = () => {
