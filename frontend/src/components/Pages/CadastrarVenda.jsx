@@ -15,11 +15,11 @@ const CadastrarVenda = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const produtosData = useSelector((state) => state.venda.produtos[0]);
-  const clientesData = useSelector((state) => state.venda.clientes[0]);
-  const vendedoresData = useSelector((state) => state.venda.vendedores[0]);
+  const produtosData = useSelector((state) => state.venda.produtos);
+  const clientesData = useSelector((state) => state.venda.clientes);
+  const vendedoresData = useSelector((state) => state.venda.vendedores);
   const produtoSearchListData = useSelector(
-    (state) => state.venda.produtoFormatado[0]
+    (state) => state.venda.produtoFormatado
   );
   const isLoading = useSelector((state) => state.venda.loading);
   const [produtos, setProdutos] = useState([]);

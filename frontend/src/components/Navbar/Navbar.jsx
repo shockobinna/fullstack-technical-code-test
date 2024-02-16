@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styles from "../Styles/Navbar.module.css";
 import * as FaIcons from "react-icons/fa";
@@ -9,10 +9,19 @@ function Navbar() {
   const [sidebar, setSidebar] = useState(false);
   const location = useLocation();
   const editData = location.state?.editData;
+  const sidebarRef = useRef(null);
 
-  const showSidebar = () => {
+  const showSidebar = (e) => {
+    e.preventDefault();
     setSidebar(!sidebar);
-    console.log(sidebar);
+  };
+
+  //Function to close the sidebar from anywhere
+  const handleClickOutside = (e) => {
+    if (sidebarRef.current.contains(e.target)) {
+      return;
+    }
+    setSidebar(false);
   };
 
   // Function to get the title based on the current route
@@ -34,22 +43,36 @@ function Navbar() {
 
   useEffect(() => {
     document.title = getTitle();
-  }, [location]);
+  }, [location, getTitle()]);
+
+  useEffect(() => {
+    if (sidebar === true) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      // Remove event listener when component unmounts
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sidebar]);
 
   return (
     <>
       <div className={styles.nav_bar}>
-        <div className="">
+        <div className="col-5">
           <Link to="#" className={styles.nav_menu_icon} onClick={showSidebar}>
             <FaIcons.FaBars />
           </Link>
           <img src={logo} alt="Logo" className={styles.navbar_logo} />
         </div>
-        <div className={styles.titulo}>
-          <h3>{getTitle()}</h3>
+        <div className={`col-7 ${styles.titulo}`}>
+          <h4>{getTitle()}</h4>
         </div>
       </div>
       <div
+        ref={sidebarRef}
         className={
           sidebar
             ? `${styles.sidebar_container} ${styles.active}`

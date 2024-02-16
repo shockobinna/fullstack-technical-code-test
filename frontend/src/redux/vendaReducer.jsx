@@ -1,12 +1,12 @@
 const initialState = {
   allVendas: [],
-  vendas: [],
   produtos: [],
   clientes: [],
   vendedores: [],
   produtoFormatado: [],
   loading: false,
   deleteVendaStatus: false,
+  editVendaStatus: false,
 };
 
 const vendaReducer = (state = initialState, action) => {
@@ -21,18 +21,12 @@ const vendaReducer = (state = initialState, action) => {
       // Update state with fetched vendas from API
       return {
         ...state,
-        allVendas: [action.payload],
+        allVendas: action.payload,
         loading: false,
         deleteVendaStatus: false,
+        editVendaStatus: false,
       };
-    case "UPDATE_VENDA_DATA":
-      // Update venda
-      return {
-        ...state,
-        vendas: action.payload.length > 0 ? JSON.parse(action.payload) : [],
-        loading: false,
-        deleteVendaStatus: false,
-      };
+
     case "DELETE_VENDA":
       // Update venda
       return {
@@ -49,7 +43,7 @@ const vendaReducer = (state = initialState, action) => {
       // Handle adding produtos
       return {
         ...state,
-        produtos: [...state.produtos, action.payload],
+        produtos: action.payload,
         loading: false,
         deleteVendaStatus: false,
       };
@@ -58,7 +52,7 @@ const vendaReducer = (state = initialState, action) => {
       // Handle adding clientes
       return {
         ...state,
-        clientes: [...state.clientes, action.payload],
+        clientes: action.payload,
         loading: false,
         deleteVendaStatus: false,
       };
@@ -67,7 +61,7 @@ const vendaReducer = (state = initialState, action) => {
       // Handle adding vendedores
       return {
         ...state,
-        vendedores: [...state.vendedores, action.payload],
+        vendedores: action.payload,
         loading: false,
         deleteVendaStatus: false,
       };
@@ -75,10 +69,19 @@ const vendaReducer = (state = initialState, action) => {
     case "SEARCH_PRODUTO":
       return {
         ...state,
-        produtoFormatado: [...state.produtoFormatado, action.payload],
+        produtoFormatado: action.payload,
         loading: false,
         deleteVendaStatus: false,
       };
+
+    case "EDITED_SUCCESSFULLY":
+      return {
+        ...state,
+        editVendaStatus: action.payload,
+        loading: false,
+        deleteVendaStatus: false,
+      };
+
     default:
       return state;
   }

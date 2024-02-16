@@ -13,7 +13,7 @@ const DisplayVendas = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const allVendas = useSelector((state) => state.venda.allVendas[0]);
+  const allVendas = useSelector((state) => state.venda.allVendas);
   const isLoading = useSelector((state) => state.venda.loading);
   const isVendaDeleted = useSelector((state) => state.venda.deleteVendaStatus);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -128,10 +128,10 @@ const DisplayVendas = () => {
   };
 
   const handleUpdate = (item) => {
-    // Add code to handle "Update" action here
-    const data = JSON.stringify(item);
-    dispatch({ type: "UPDATE_VENDA_DATA", payload: data });
-    navigate("/editarVenda", { state: { editData: item.nota_fiscal } });
+    localStorage.setItem("editVenda", JSON.stringify(item));
+    navigate("/editarVenda", {
+      state: { editData: item.nota_fiscal },
+    });
   };
 
   const calculateTotalsForRow = (rowId) => {

@@ -81,10 +81,10 @@ span {
 .titulo {
   display: flex;
   width: 400px;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
-.titulo > h3 {
+.titulo > h4 {
   color: var(--xpto-brand-primary, #00585e);
   font-family: Roboto;
   font-size: 32px;

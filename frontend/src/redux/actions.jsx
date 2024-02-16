@@ -38,7 +38,7 @@ export const fetchProdutos = () => {
 export const fetchClientes = () => {
   return async (dispatch) => {
     try {
-      dispatch(fetchVendasRequest());
+      // dispatch(fetchVendasRequest());
       const response = await axios.get("http://127.0.0.1:8000/clientes/");
       dispatch({ type: "ADD_CLIENTES", payload: response.data });
     } catch (error) {
@@ -50,7 +50,7 @@ export const fetchClientes = () => {
 export const fetchVendedores = () => {
   return async (dispatch) => {
     try {
-      dispatch(fetchVendasRequest());
+      // dispatch(fetchVendasRequest());
       const response = await axios.get("http://127.0.0.1:8000/vendedores/");
       dispatch({ type: "ADD_VENDEDORES", payload: response.data });
     } catch (error) {
@@ -63,7 +63,6 @@ export const deleteVenda = (id) => {
   return async (dispatch) => {
     try {
       const response = await axios.delete(`http://127.0.0.1:8000/vendas/${id}`);
-      console.log(response.status);
       if (response.status === 204) {
         dispatch({ type: "DELETE_VENDA", payload: id });
       }
@@ -73,7 +72,34 @@ export const deleteVenda = (id) => {
   };
 };
 
-export const updateVendaData = (updatedData) => ({
-  type: "UPDATE_VENDA_DATA",
-  payload: updatedData,
-});
+export const deleteProdutoVendido = (id) => {
+  return async (dispatch) => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/produtosvendidos/${id}`);
+    } catch (error) {
+      console.log("Error deleting the produto:", error);
+    }
+  };
+};
+
+export const updateVendaData = (invoice) => {
+  return async (dispatch) => {
+    try {
+      const response = await axios.patch(
+        `http://127.0.0.1:8000/vendas/${invoice.id}/`,
+        invoice,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status === 200) {
+        dispatch({ type: "EDITED_SUCCESSFULLY", payload: true });
+      }
+    } catch (error) {
+      console.error("Error updating Venda data:", error);
+      dispatch({ type: "EDITED_SUCCESSFULLY", payload: false });
+    }
+  };
+};
